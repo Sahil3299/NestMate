@@ -2,26 +2,85 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Header from "./components/Header";
 import LoginPage from "./pages/LoginPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import MatchesPage from "./pages/MatchesPage";
+import ProfileDetailPage from "./pages/ProfileDetailPage";
 import ChatPage from "./pages/ChatPage";
+import RoommateDetailPage from "./pages/RoommateDetailPage";
 
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          {/* Public Route */}
+          <Route path="/login" element={<LoginPage />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Navigate to="/matches" replace />} />
-          <Route path="/profile" element={<ProfileSetupPage />} />
-          <Route path="/matches" element={<MatchesPage />} />
-          <Route path="/chat/:withUid" element={<ChatPage />} />
-        </Route>
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Header />
+                  <main className="flex-1">
+                    <Navigate to="/matches" replace />
+                  </main>
+                </>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <>
+                  <Header />
+                  <main className="flex-1">
+                    <ProfileSetupPage />
+                  </main>
+                </>
+              }
+            />
+            <Route
+              path="/matches"
+              element={
+                <>
+                  <Header />
+                  <main className="flex-1">
+                    <MatchesPage />
+                  </main>
+                </>
+              }
+            />
+            <Route
+              path="/profile/:uid"
+              element={
+                <>
+                  <Header />
+                  <main className="flex-1">
+                    <ProfileDetailPage />
+                  </main>
+                </>
+              }
+            />
+            <Route
+              path="/chat/:uid"
+              element={
+                <>
+                  <Header />
+                  <main className="flex-1">
+                    <ChatPage />
+                  </main>
+                </>
+              }
+            />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/matches" replace />} />
-      </Routes>
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
     </AuthProvider>
   );
 }
