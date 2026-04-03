@@ -6,7 +6,6 @@ import Header from "./components/Header";
 import LoginPage from "./pages/LoginPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import MatchesPage from "./pages/MatchesPage";
-import ProfileDetailPage from "./pages/ProfileDetailPage";
 import ChatPage from "./pages/ChatPage";
 import RoommateDetailPage from "./pages/RoommateDetailPage";
 
@@ -59,7 +58,7 @@ export default function App() {
                 <>
                   <Header />
                   <main className="flex-1">
-                    <ProfileDetailPage />
+                    <RoommateDetailPage />
                   </main>
                 </>
               }

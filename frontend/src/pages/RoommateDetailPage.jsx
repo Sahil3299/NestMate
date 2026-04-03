@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   MapPin,
   MessageCircle,
-  ChevronLeft,
-  ChevronRight,
   Check,
   Lock,
   Star,
-  Bookmark,
   Wifi,
   Wind,
   Droplet,
@@ -17,91 +14,19 @@ import {
   Utensils,
   Heater,
   Smartphone,
-  Shield,
 } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { api } from "../lib/api";
 import Button from "../components/Button";
-
-// Preference Tag Component
-function PreferenceTag({ icon, label, selected = false }) {
-  return (
-    <div
-      className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
-        selected
-          ? "border-primary-500 bg-primary-50"
-          : "border-gray-200 bg-gray-50 hover:border-gray-300"
-      }`}
-    >
-      <span className="text-lg">{icon}</span>
-      <span className="text-sm font-medium text-gray-700">{label}</span>
-    </div>
-  );
-}
+import TagPill from "../components/TagPill";
+import RoommateCarousel from "../components/RoommateCarousel";
 
 // Amenity Item Component
 function AmenityItem({ icon: Icon, label }) {
   return (
-    <div className="flex flex-col items-center gap-2 px-3 py-2">
-      <Icon className="w-6 h-6 text-primary-600" />
+    <div className="flex flex-col items-center gap-2 px-3 py-2 w-[86px]">
+      <Icon className="w-6 h-6 text-blue-600" />
       <span className="text-xs font-medium text-gray-700 text-center">{label}</span>
-    </div>
-  );
-}
-
-// Image Carousel Component
-function ImageCarousel({ images }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  return (
-    <div className="relative w-full aspect-video bg-gray-200 rounded-xl overflow-hidden group">
-      <img
-        src={images[currentIndex]}
-        alt={`Property ${currentIndex + 1}`}
-        className="w-full h-full object-cover transition-opacity duration-300"
-      />
-
-      {/* Carousel Controls */}
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={prevImage}
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-800" />
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-800" />
-          </button>
-
-          {/* Indicators */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-            {images.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentIndex ? "bg-white w-6" : "bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Image Counter */}
-      <div className="absolute top-3 right-3 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
-        {currentIndex + 1} / {images.length}
-      </div>
     </div>
   );
 }
@@ -110,7 +35,7 @@ function ImageCarousel({ images }) {
 function HighlightItem({ text }) {
   return (
     <div className="flex items-center gap-3">
-      <Check className="w-5 h-5 text-primary-600 flex-shrink-0" />
+      <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
       <span className="text-gray-700 font-medium">{text}</span>
     </div>
   );
@@ -121,62 +46,135 @@ function BasicInfoCard({ icon: Icon, label, value }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-5 h-5 text-primary-600" />
-        <span className="text-xs font-medium text-gray-600 uppercase">{label}</span>
+        <Icon className="w-5 h-5 text-blue-600" />
+        <span className="text-xs font-medium text-gray-500 uppercase">{label}</span>
       </div>
-      <span className="text-lg font-bold text-gray-900">{value}</span>
+      <span className="text-base font-bold text-gray-900">{value}</span>
     </div>
   );
 }
 
 export default function RoommateDetailPage() {
-  const [isSaved, setIsSaved] = useState(false);
+  const navigate = useNavigate();
+  const { uid } = useParams();
+  const routeLocation = useLocation();
+  const initialMatch = routeLocation.state?.match || null;
 
-  // Sample data - in production, this would come from props or API
-  const roommate = {
-    uid: "user123",
-    name: "Sahil",
-    age: 26,
-    gender: "Male",
-    city: "Pune",
-    location: "Shivajinagar, Pune, Maharashtra, India",
-    budgetMin: 8000,
-    budgetMax: 10000,
-    occupancy: "Single",
-    lookingFor: "Male",
-    matchPercent: 85,
-    verified: true,
-    images: [
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop",
-    ],
-    preferences: [
-      { icon: "🦉", label: "Night Owl" },
-      { icon: "🌅", label: "Early Bird" },
-      { icon: "📚", label: "Studious" },
-      { icon: "💪", label: "Fitness Freak" },
-      { icon: "⚽", label: "Sporty" },
-      { icon: "✋", label: "Non-Smoker" },
-    ],
-    highlights: [
-      "Gated Society",
-      "Attached Washroom",
-      "Balcony",
-      "Study Area",
-      "Natural Light",
-    ],
-    amenities: [
-      { icon: Wifi, label: "WiFi" },
+  const [loading, setLoading] = useState(!initialMatch);
+  const [error, setError] = useState("");
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (initialMatch) {
+      setProfile(initialMatch);
+      setLoading(false);
+      return;
+    }
+
+    let active = true;
+
+    async function fetchProfile() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await api.get("/api/matches/best", { params: { limit: 50 } });
+        const found =
+          (res?.data?.bestMatches || []).find((m) => String(m.uid) === String(uid)) ||
+          null;
+        if (active) {
+          setProfile(found);
+          if (!found) setError("Profile not found in current match results.");
+        }
+      } catch (err) {
+        if (active) {
+          setError(err?.response?.data?.error || err?.message || "Failed to load profile");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    fetchProfile();
+    return () => {
+      active = false;
+    };
+  }, [initialMatch, uid]);
+
+  const roommate = useMemo(() => {
+    if (!profile) return null;
+    const fallbackImage =
+      "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=1200&h=900&fit=crop";
+    const mappedAmenities = [
+      { icon: Wifi, label: "Wifi" },
       { icon: Wind, label: "AC" },
       { icon: Droplet, label: "Fridge" },
       { icon: Utensils, label: "Washing Machine" },
       { icon: Heater, label: "Water Heater" },
       { icon: Tv, label: "Smart TV" },
-    ],
-    description:
-      "A professional and well-organized roommate looking for someone who values cleanliness and quiet hours. I work in IT and often have late-night calls. Prefer someone who is independent and respectful of personal space.",
-  };
+    ];
+
+    const habits = profile?.habits || {};
+    const preferences = [];
+    if (habits.sleep === "late") preferences.push("Night Owl");
+    if (habits.sleep === "early") preferences.push("Early Bird");
+    if (habits.sleep === "medium") preferences.push("Regular Schedule");
+    preferences.push(habits.smoking ? "Smoker" : "Non-smoker");
+    preferences.push(habits.drinking ? "Drinker" : "Non-drinker");
+    preferences.push(habits.pets ? "Pet Friendly" : "No Pets");
+
+    return {
+      uid: profile.uid,
+      name: profile.name || "Nestmate User",
+      gender: profile.gender || "Not specified",
+      city: profile.city || "Unknown",
+      location: `${profile.city || "Unknown city"}, India`,
+      budgetMin: profile.budgetMin || profile.budgetMax || 0,
+      budgetMax: profile.budgetMax || profile.budgetMin || 0,
+      occupancy: "Single",
+      lookingFor: "Roommate",
+      matchPercent: profile.matchPercent || 0,
+      verified: true,
+      images: profile.images?.length
+        ? profile.images
+        : [
+            `https://picsum.photos/seed/${encodeURIComponent(profile.uid)}-0/1200/800`,
+            `https://picsum.photos/seed/${encodeURIComponent(profile.uid)}-1/1200/800`,
+            `https://picsum.photos/seed/${encodeURIComponent(profile.uid)}-2/1200/800`,
+          ],
+      preferences: (preferences.length ? preferences : ["Night Owl", "Fitness Freak", "Non-smoker"])
+        .slice(0, 6)
+        .map((label) => ({ icon: null, label })),
+      highlights: profile.highlights || ["Gated Society", "Attached Washroom", "Natural Light"],
+      amenities: profile.amenities?.length ? profile.amenities : mappedAmenities,
+      description:
+        "This profile has detailed roommate expectations and personal habits. Upgrade to premium to unlock complete details and connect faster.",
+    };
+  }, [profile]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-primary-600 animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !roommate) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center max-w-md w-full">
+          <p className="text-gray-900 font-semibold mb-2">Profile unavailable</p>
+          <p className="text-gray-600 mb-4">{error || "Unable to render this listing."}</p>
+          <Button onClick={() => navigate("/matches")} variant="primary">
+            Back to listings
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,15 +200,15 @@ export default function RoommateDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Profile Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-20 space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-20 space-y-4">
               {/* Avatar */}
               <div className="flex justify-center">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-400 via-primary-500 to-accent-600 flex items-center justify-center text-white font-bold text-5xl shadow-lg">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center text-white font-bold text-5xl shadow-lg">
                     {roommate.name.charAt(0)}
                   </div>
                   {roommate.verified && (
-                    <div className="absolute bottom-0 right-0 bg-primary-600 rounded-full p-2 shadow-lg">
+                    <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 shadow-lg">
                       <Check className="w-5 h-5 text-white" />
                     </div>
                   )}
@@ -220,9 +218,9 @@ export default function RoommateDetailPage() {
               {/* Name & Match Badge */}
               <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold text-gray-900">{roommate.name}</h1>
-                <div className="flex items-center justify-center gap-2 bg-primary-50 px-3 py-1 rounded-full w-fit mx-auto">
-                  <Star className="w-4 h-4 text-primary-600 fill-primary-600" />
-                  <span className="text-sm font-bold text-primary-600">
+                <div className="flex items-center justify-center gap-2 bg-blue-50 px-3 py-1 rounded-full w-fit mx-auto">
+                  <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
+                  <span className="text-sm font-bold text-blue-700">
                     {roommate.matchPercent}% Match
                   </span>
                 </div>
@@ -243,33 +241,19 @@ export default function RoommateDetailPage() {
                   variant="primary"
                   size="lg"
                   className="w-full gap-2 justify-center"
+                  onClick={() => navigate(`/chat/${roommate.uid}`)}
                 >
                   <MessageCircle className="w-5 h-5" />
                   Chat Now
                 </Button>
-
-                {/* Save Button */}
-                <button
-                  onClick={() => setIsSaved(!isSaved)}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 font-medium transition-all ${
-                    isSaved
-                      ? "border-primary-600 bg-primary-50 text-primary-600"
-                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  <Bookmark
-                    className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`}
-                  />
-                  {isSaved ? "Saved" : "Save"}
-                </button>
               </div>
 
               {/* Premium Info */}
-              <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 text-center">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
                 <p className="text-xs font-medium text-gray-600 mb-2">
                   Premium User
                 </p>
-                <p className="text-sm font-semibold text-primary-700">
+                <p className="text-sm font-semibold text-blue-700">
                   Verified & Active
                 </p>
               </div>
@@ -280,22 +264,22 @@ export default function RoommateDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <ImageCarousel images={roommate.images} />
+              <RoommateCarousel images={roommate.images} />
             </div>
 
             {/* Basic Info Grid */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Basic Info</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <BasicInfoCard
-                  icon={roommate.gender === "Male" ? Shield : Star}
+                  icon={Star}
                   label="Gender"
                   value={roommate.gender}
                 />
                 <BasicInfoCard
                   icon={Zap}
                   label="Approx Rent"
-                  value={`₹${roommate.budgetMin}-${roommate.budgetMax}`}
+                  value={`₹${roommate.budgetMin?.toLocaleString()}-${roommate.budgetMax?.toLocaleString()}`}
                 />
                 <BasicInfoCard
                   icon={Sofa}
@@ -312,20 +296,13 @@ export default function RoommateDetailPage() {
 
             {/* Preferences Tags */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Roommate Type
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Preferences</h2>
               <p className="text-sm text-gray-600 mb-4">
                 What type of flatmate do you prefer?
               </p>
               <div className="flex flex-wrap gap-3">
-                {roommate.preferences.map((pref, idx) => (
-                  <PreferenceTag
-                    key={idx}
-                    icon={pref.icon}
-                    label={pref.label}
-                    selected={idx < 2}
-                  />
+                {roommate.preferences.map((pref) => (
+                  <TagPill key={pref.label} label={pref.label} />
                 ))}
               </div>
             </div>
@@ -343,14 +320,17 @@ export default function RoommateDetailPage() {
             {/* Amenities */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Amenities</h2>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                {roommate.amenities.map((amenity, idx) => (
-                  <AmenityItem
-                    key={idx}
-                    icon={amenity.icon}
-                    label={amenity.label}
-                  />
-                ))}
+              <div className="flex flex-wrap gap-3">
+                {roommate.amenities.map((amenity, idx) => {
+                  const Icon = amenity.icon || Wifi;
+                  return (
+                    <AmenityItem
+                      key={idx}
+                      icon={Icon}
+                      label={amenity.label || amenity.name || "Amenity"}
+                    />
+                  );
+                })}
               </div>
             </div>
 
@@ -387,6 +367,7 @@ export default function RoommateDetailPage() {
           variant="primary"
           size="lg"
           className="w-full gap-2 justify-center"
+          onClick={() => navigate(`/chat/${roommate.uid}`)}
         >
           <MessageCircle className="w-5 h-5" />
           Chat Now

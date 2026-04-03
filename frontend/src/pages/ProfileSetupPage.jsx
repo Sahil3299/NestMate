@@ -207,7 +207,7 @@ export default function ProfileSetupPage() {
           <Card className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-sm font-bold">3</span>
+                <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span>
                 Lifestyle Habits
               </h2>
               <p className="text-sm text-gray-600 mt-1">Help us match you with compatible roommates</p>
@@ -236,7 +236,7 @@ export default function ProfileSetupPage() {
           <Card className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center text-sm font-bold">4</span>
+                <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">4</span>
                 Sleep Schedule
               </h2>
               <p className="text-sm text-gray-600 mt-1">When do you usually sleep?</p>

@@ -4,18 +4,13 @@ import { api } from "../lib/api";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Select from "../components/Select";
-
-function toBoolOrNull(v) {
-  if (v === "" || v === undefined) return null;
-  if (v === "true") return true;
-  if (v === "false") return false;
-  return null;
-}
+import ListingCard from "../components/ListingCard";
+import ListingCardSkeleton from "../components/ListingCardSkeleton";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bestMatches, setBestMatches] = useState([]);
 
@@ -60,23 +55,18 @@ export default function MatchesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Generate avatar color based on name
-  const getAvatarColor = (name) => {
-    const colors = [
-      "from-purple-400 to-pink-600",
-      "from-blue-400 to-cyan-600",
-      "from-yellow-400 to-orange-600",
-      "from-green-400 to-emerald-600",
-      "from-pink-400 to-red-600",
-    ];
-    return colors[name.charCodeAt(0) % colors.length];
-  };
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Search & Filter Section */}
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Find your next roommate</h1>
+            <p className="mt-1 text-gray-500">
+              Match by location and budget, then chat instantly.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
             <Input
               label="Location"
@@ -165,7 +155,7 @@ export default function MatchesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error State */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -182,111 +172,39 @@ export default function MatchesPage() {
 
         {/* Matches Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-primary-600 animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Finding perfect matches...</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <ListingCardSkeleton key={idx} />
+            ))}
           </div>
         ) : bestMatches.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {bestMatches.map((match) => (
-              <div
+              <ListingCard
                 key={match.uid}
-                className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-200 cursor-pointer bg-white"
-                onClick={() => navigate(`/profile/${match.uid}`)}
-              >
-                {/* Header with Match % */}
-                <div className="p-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900">{match.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        📍 {match.city} • {match.age} • {match.gender}
-                      </p>
-                    </div>
-                    {/* Avatar */}
-                    <div className={`w-16 h-16 bg-gradient-to-br ${getAvatarColor(match.name)} rounded-lg flex items-center justify-center text-white font-bold text-2xl flex-shrink-0`}>
-                      {match.name.charAt(0).toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4 space-y-4">
-                  {/* Rent */}
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium uppercase">Rent</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      ₹{match.budgetMin?.toLocaleString()} - ₹{match.budgetMax?.toLocaleString()}
-                    </p>
-                  </div>
-
-                  {/* Looking For */}
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium uppercase">Looking for</p>
-                    <p className="text-sm font-medium text-gray-900">Roommate</p>
-                  </div>
-
-                  {/* Match Score */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary-500 to-accent-500"
-                        style={{ width: `${match.matchPercent}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-bold text-primary-600">{match.matchPercent}%</span>
-                  </div>
-
-                  {/* Habits */}
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${match.habits?.smoking ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"}`}>
-                      🚬 {match.habits?.smoking ? "Smoker" : "Non-smoker"}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${match.habits?.drinking ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-700"}`}>
-                      🍺 {match.habits?.drinking ? "Drinker" : "Non-drinker"}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${match.habits?.pets ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-                      🐾 {match.habits?.pets ? "Has Pets" : "No Pets"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Footer with Actions */}
-                <div className="p-4 border-t border-gray-200 flex gap-2 bg-gray-50">
-                  <button className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948-.684l1.498-4.493a1 1 0 011.502 0l1.498 4.493a1 1 0 00.948.684H19a2 2 0 012 2v1M3 5a2 2 0 002 2h3l1 3h4l1-3h3a2 2 0 012-2m-1 11a1 1 0 100-2 1 1 0 000 2m-9 0a1 1 0 100-2 1 1 0 000 2m10 0a1 1 0 100-2 1 1 0 000 2m-6-1v-3" />
-                    </svg>
-                  </button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/profile/${match.uid}`);
-                    }}
-                  >
-                    👁️ View Profile
-                  </Button>
-                </div>
-              </div>
+                match={match}
+                onOpen={() =>
+                  navigate(`/profile/${match.uid}`, {
+                    state: { match },
+                  })
+                }
+              />
             ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No matches found</h3>
-            <p className="text-gray-600 mb-6">Try adjusting your filters or update your profile</p>
-            <Button
-              onClick={() => navigate("/profile")}
-              variant="primary"
-              size="md"
-            >
-              Update Your Profile
-            </Button>
+            <div className="mx-auto w-fit px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-100">
+              No matches found
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mt-4">Adjust your filters</h3>
+            <p className="text-gray-500 mt-2">
+              Update your profile to improve match quality.
+            </p>
+            <div className="mt-6">
+              <Button onClick={() => navigate("/profile")} variant="primary" size="md">
+                Update Profile
+              </Button>
+            </div>
           </div>
         )}
       </div>

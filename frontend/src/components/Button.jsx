@@ -11,11 +11,16 @@ export default function Button({
   const baseStyles = "font-medium transition-all duration-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer";
 
   const variants = {
-    primary: "bg-gradient-to-r from-primary-600 to-primary-500 text-white hover:shadow-lg hover:from-primary-700 hover:to-primary-600 disabled:opacity-50 disabled:cursor-not-allowed",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed",
-    accent: "bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:shadow-lg hover:from-accent-700 hover:to-accent-600 disabled:opacity-50 disabled:cursor-not-allowed",
-    ghost: "text-primary-600 hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed",
-    outline: "border-2 border-primary-600 text-primary-600 hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed",
+    primary:
+      "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed",
+    secondary:
+      "bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed",
+    accent:
+      "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed",
+    ghost:
+      "text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed",
+    outline:
+      "border-2 border-blue-600 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed",
   };
 
   const sizes = {

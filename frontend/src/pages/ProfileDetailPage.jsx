@@ -105,7 +105,7 @@ const ProfileDetailPage = () => {
       "from-purple-400 to-pink-600",
       "from-blue-400 to-cyan-600",
       "from-yellow-400 to-orange-600",
-      "from-green-400 to-emerald-600",
+      "from-blue-400 to-indigo-600",
       "from-pink-400 to-red-600",
     ];
     return colors[name.charCodeAt(0) % colors.length];
@@ -147,7 +147,7 @@ const ProfileDetailPage = () => {
             <div className="mb-3">
               <h2 className="text-3xl font-bold text-gray-900">{profile.name}</h2>
               {profile.matchPercent && (
-                <div className="mt-2 inline-flex items-center justify-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                <div className="mt-2 inline-flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
                   <Check className="w-4 h-4" />
                   <span className="text-sm font-semibold">{profile.matchPercent}% Match</span>
                 </div>
@@ -266,8 +266,8 @@ const ProfileDetailPage = () => {
           <h3 className="text-lg font-bold text-gray-900 mb-4">Highlights</h3>
           <div className="space-y-3">
             {highlights.map((highlight, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div key={idx} className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 <span className="text-gray-900 font-medium">{highlight}</span>
               </div>
             ))}
