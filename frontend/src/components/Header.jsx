@@ -39,7 +39,7 @@ export default function Header() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              My Profile
+              Profile
             </button>
           </nav>
 

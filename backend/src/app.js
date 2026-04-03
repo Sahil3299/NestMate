@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const path = require("path");
+const fs = require("fs");
 
 const env = require("./config/env");
 
@@ -24,6 +26,15 @@ function createApp() {
   app.use(morgan("dev"));
 
   app.get("/health", (req, res) => res.status(200).json({ ok: true }));
+
+  // Serve uploaded avatar files
+  const uploadDir = path.join(__dirname, "uploads");
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (e) {
+    // ignore; uploads will fail gracefully on disk errors
+  }
+  app.use("/uploads", express.static(uploadDir));
 
   app.use("/api/auth", authRoutes);
   app.use("/api/profile", profileRoutes);

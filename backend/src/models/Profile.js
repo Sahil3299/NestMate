@@ -19,6 +19,14 @@ const profileSchema = new mongoose.Schema(
       // "early" | "medium" | "late"
       sleep: { type: String, required: true, enum: ["early", "medium", "late"] },
     },
+
+    bio: { type: String, default: "" },
+
+    // Either:
+    // - avatarPath: relative URL path like "/uploads/avatars/..."
+    // - avatarPreset: preset id (e.g. "preset-1") when no upload is used
+    avatarPath: { type: String, default: "" },
+    avatarPreset: { type: String, default: "" },
   },
   { timestamps: true }
 );
