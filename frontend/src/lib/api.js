@@ -17,3 +17,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Listing APIs
+export const listingAPI = {
+  create: (data) => api.post("/api/listings", data),
+  getOne: (id) => api.get(`/api/listings/${id}`),
+  update: (id, data) => api.put(`/api/listings/${id}`, data),
+  delete: (id) => api.delete(`/api/listings/${id}`),
+  getMyListings: (limit = 20, skip = 0) =>
+    api.get("/api/listings/my-listings", { params: { limit, skip } }),
+  search: (params) => api.get("/api/listings/search", { params }),
+};
+
+// Review APIs
+export const reviewAPI = {
+  create: (data) => api.post("/api/reviews", data),
+  getForTarget: (targetType, targetId, limit = 20, skip = 0) =>
+    api.get("/api/reviews", { params: { targetType, targetId, limit, skip } }),
+  getMyReviews: (limit = 20, skip = 0) =>
+    api.get("/api/reviews/my-reviews", { params: { limit, skip } }),
+  delete: (reviewId) => api.delete(`/api/reviews/${reviewId}`),
+};
+
+

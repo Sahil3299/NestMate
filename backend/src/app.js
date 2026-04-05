@@ -11,6 +11,8 @@ const profileRoutes = require("./routes/profileRoutes");
 const matchesRoutes = require("./routes/matchesRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const authRoutes = require("./routes/authRoutes");
+const listingsRoutes = require("./routes/listingsRoutes");
+const reviewsRoutes = require("./routes/reviewsRoutes");
 
 function createApp() {
   const app = express();
@@ -39,6 +41,8 @@ function createApp() {
   app.use("/api/auth", authRoutes);
   app.use("/api/profile", profileRoutes);
   app.use("/api/matches", matchesRoutes);
+  app.use("/api/listings", listingsRoutes);
+  app.use("/api/reviews", reviewsRoutes);
   app.use("/api", chatRoutes);
 
   app.use((req, res) => {
