@@ -1,86 +1,28 @@
-import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Header from "./components/Header";
-import LoginPage from "./pages/LoginPage";
-import ProfileSetupPage from "./pages/ProfileSetupPage";
-import MatchesPage from "./pages/MatchesPage";
-import ChatPage from "./pages/ChatPage";
-import ProfileViewPage from "./pages/ProfileViewPage";
+import { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import HomePage from './pages/HomePage';
+import BrowseListingsPage from './pages/BrowseListingsPage';
+import PostRoomPage from './pages/PostRoomPage';
+import ListingDetailPage from './pages/ListingDetailPage';
+import ProfilePage from './pages/ProfilePage';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white flex flex-col">
+      <Navbar />
+      <main className="flex-grow">
         <Routes>
-          {/* Public Route */}
-          <Route path="/login" element={<LoginPage />} />
-
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route
-              path="/"
-              element={
-                <>
-                  <Header />
-                  <main className="flex-1">
-                    <Navigate to="/matches" replace />
-                  </main>
-                </>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <>
-                  <Header />
-                  <main className="flex-1">
-                    <ProfileSetupPage />
-                  </main>
-                </>
-              }
-            />
-            <Route
-              path="/matches"
-              element={
-                <>
-                  <Header />
-                  <main className="flex-1">
-                    <MatchesPage />
-                  </main>
-                </>
-              }
-            />
-            <Route
-              path="/profile/:uid"
-              element={
-                <>
-                  <Header />
-                  <main className="flex-1">
-                    <ProfileViewPage />
-                  </main>
-                </>
-              }
-            />
-            <Route
-              path="/chat/:uid"
-              element={
-                <>
-                  <Header />
-                  <main className="flex-1">
-                    <ChatPage />
-                  </main>
-                </>
-              }
-            />
-          </Route>
-
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/browse" element={<BrowseListingsPage />} />
+          <Route path="/browse/:id" element={<ListingDetailPage />} />
+          <Route path="/post-room" element={<PostRoomPage />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
-    </AuthProvider>
+      </main>
+      <Footer />
+    </div>
   );
 }
-
