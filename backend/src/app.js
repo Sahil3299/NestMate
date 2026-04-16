@@ -5,54 +5,98 @@ const morgan = require("morgan");
 const path = require("path");
 const fs = require("fs");
 
-const env = require("./config/env");
+const env = require("./config/environment");
+const { AppError } = require("./utils/errors");
 
-const profileRoutes = require("./routes/profileRoutes");
-const matchesRoutes = require("./routes/matchesRoutes");
-const chatRoutes = require("./routes/chatRoutes");
-const authRoutes = require("./routes/authRoutes");
-const listingsRoutes = require("./routes/listingsRoutes");
-const reviewsRoutes = require("./routes/reviewsRoutes");
+// Routes
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/users");
+const listingRoutes = require("./routes/listings");
+const messageRoutes = require("./routes/messages");
+const reviewRoutes = require("./routes/reviews");
+const matchRoutes = require("./routes/matches");
 
 function createApp() {
   const app = express();
 
-  app.use(helmet());
+  // ═════════════════════════════════════════════════════════════════════════
+  // MIDDLEWARE - Security & Logging
+  // ═════════════════════════════════════════════════════════════════════════
+  app.use(helmet()); // Security headers
   app.use(
     cors({
       origin: env.CORS_ORIGIN,
       credentials: true,
     })
   );
-  app.use(express.json({ limit: "1mb" }));
-  app.use(morgan("dev"));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
+  app.use(morgan("dev")); // HTTP request logging
 
-  app.get("/health", (req, res) => res.status(200).json({ ok: true }));
+  // ═════════════════════════════════════════════════════════════════════════
+  // ROUTES - Health & Static
+  // ═════════════════════════════════════════════════════════════════════════
+  app.get("/health", (req, res) => {
+    res.status(200).json({ success: true, message: "Server is running" });
+  });
 
-  // Serve uploaded avatar files
+  // Serve uploaded files
   const uploadDir = path.join(__dirname, "uploads");
   try {
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
   } catch (e) {
-    // ignore; uploads will fail gracefully on disk errors
+    console.warn("Could not create uploads directory:", e.message);
   }
   app.use("/uploads", express.static(uploadDir));
 
-  app.use("/api/auth", authRoutes);
-  app.use("/api/profile", profileRoutes);
-  app.use("/api/matches", matchesRoutes);
-  app.use("/api/listings", listingsRoutes);
-  app.use("/api/reviews", reviewsRoutes);
-  app.use("/api", chatRoutes);
+  // ═════════════════════════════════════════════════════════════════════════
+  // API ROUTES
+  // ═════════════════════════════════════════════════════════════════════════
+  app.use(`${env.API_PREFIX}/auth`, authRoutes);
+  app.use(`${env.API_PREFIX}/users`, userRoutes);
+  app.use(`${env.API_PREFIX}/listings`, listingRoutes);
+  app.use(`${env.API_PREFIX}/messages`, messageRoutes);
+  app.use(`${env.API_PREFIX}/reviews`, reviewRoutes);
+  app.use(`${env.API_PREFIX}/matches`, matchRoutes);
 
-  app.use((req, res) => {
-    res.status(404).json({ error: "Not found" });
+  // ═════════════════════════════════════════════════════════════════════════
+  // ERROR HANDLING
+  // ═════════════════════════════════════════════════════════════════════════
+
+  // 404 handler - Route not found
+  app.use((req, res, next) => {
+    next(new AppError(`Route not found: ${req.method} ${req.path}`, 404, "NOT_FOUND"));
   });
 
+  // Global error handler - Must be last
   app.use((err, req, res, next) => {
-    // eslint-disable-next-line no-unused-vars
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    // Set default values
+    let error = err instanceof AppError ? err : new AppError(err.message || "Internal Server Error", 500, "INTERNAL_ERROR");
+
+    // Handle specific Mongoose errors
+    if (err.name === "MongooseValidationError") {
+      const messages = Object.values(err.errors).map(e => e.message);
+      error = new AppError(messages.join(", "), 422, "VALIDATION_ERROR");
+    }
+
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      error = new AppError(`${field} already exists`, 409, "DUPLICATE_ENTRY");
+    }
+
+    if (err.name === "CastError") {
+      error = new AppError(`Invalid ${err.path}: ${err.value}`, 400, "INVALID_INPUT");
+    }
+
+    // Log errors
+    if (error.statusCode >= 500) {
+      console.error(`[ERROR] ${error.statusCode} - ${error.message} - ${req.method} ${req.path}`);
+    }
+
+    // Send response
+    res.status(error.statusCode || 500).json(error.toJSON());
   });
 
   return app;
