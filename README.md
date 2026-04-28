@@ -1,245 +1,131 @@
-# 🏠 Nestmate — Roommate Matching & Room Listing Platform
+# NestMate
 
-Nestmate is a full-stack web application that helps users find compatible roommates and discover available rooms based on preferences like budget, location, and lifestyle.
+NestMate is a full-stack platform for finding compatible roommates and discovering available rooms. It brings together roommate matching, room listings, and real-time chat in one place so you don't have to jump between apps to sort out your living situation.
 
-It combines **roommate matching + room listing + chat system** into a single platform, making it easier to find the right living situation.
+## What It Does
 
----
+- **Roommate Matching:** The backend runs a compatibility algorithm that compares budget, location, sleep schedule, and lifestyle preferences to surface the best matches.
+- **Room Listings:** Users can post available rooms with photos, rent, location, amenities, and occupancy details. Others can browse and filter by city, budget range, and amenities.
+- **Real-Time Chat:** Built with Socket.io, the messaging system shows online status, typing indicators, and instant message delivery. Message history is persisted to MongoDB.
+- **Reviews:** Leave star ratings and comments on rooms or other users to help people make better decisions.
+- **Geospatial Search:** Find rooms within a specific radius using GeoJSON coordinates.
 
-# 🚀 Features
+## Tech Stack
 
-## 🔐 Authentication
+**Frontend**
+- React 19 + Vite
+- Tailwind CSS
+- React Router DOM
+- React Hook Form + Zod for validation
+- Axios for API calls
+- Socket.io-client for real-time events
+- Heroicons + Lucide React for icons
 
-* Secure login/signup using Firebase Authentication
-* Google login support
-* Persistent user sessions
+**Backend**
+- Node.js + Express 5
+- MongoDB + Mongoose
+- JWT + bcryptjs for authentication
+- Socket.io for WebSocket communication
+- Multer for image uploads
+- Winston for logging
+- Helmet, CORS, and express-rate-limit for security
 
----
-
-## 👤 User Profile System
-
-* Create and update profile
-* Upload profile image or choose avatar
-* Store preferences:
-
-  * Budget
-  * City
-  * Sleep schedule
-  * Lifestyle habits (smoking, drinking, pets)
-* View other users' profiles
-
----
-
-## 🧠 Roommate Matching
-
-* Smart matching based on:
-
-  * Budget overlap
-  * Same city
-  * Lifestyle compatibility
-* Displays best matches with compatibility score
-
----
-
-## 🏠 Room Listing System
-
-* Post available rooms/flats
-* Upload multiple images
-* Add:
-
-  * Rent
-  * Location
-  * Occupancy
-  * Amenities
-* Browse and filter room listings
-
----
-
-## 💬 Chat System
-
-* One-to-one messaging between users
-* Message history stored in database
-* REST-based communication (extendable to real-time)
-
----
-
-## 🔍 Search & Filters
-
-* Filter by:
-
-  * City
-  * Budget
-  * Preferences
-* Find both roommates and rooms
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-* React.js
-* Tailwind CSS
-
-## Backend
-
-* Node.js
-* Express.js
-
-## Database
-
-* MongoDB
-
-## Authentication
-
-* Firebase Authentication
-
-## File Upload
-
-* Multer (local storage)
-
----
-
-# 🧱 Project Structure
-
-## Frontend
+## Project Structure
 
 ```
-src/
- ├── components/
- ├── pages/
- │    ├── Login.jsx
- │    ├── Dashboard.jsx
- │    ├── Profile.jsx
- │    ├── Matches.jsx
- │    ├── Rooms.jsx
- │    ├── PostRoom.jsx
- │    └── Chat.jsx
- ├── firebase.js
- └── App.jsx
+NestMate/
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # Reusable UI, forms, cards, chat
+│   │   ├── pages/           # Route-level views
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # API clients, socket init, validators
+│   │   ├── contexts/        # Auth context
+│   │   └── utils/           # Helpers and formatters
+│   ├── index.html
+│   └── vite.config.js
+│
+├── backend/
+│   ├── src/
+│   │   ├── controllers/     # Route handlers
+│   │   ├── models/          # Mongoose schemas
+│   │   ├── routes/          # API route definitions
+│   │   ├── middleware/      # Auth, error handling, rate limiting
+│   │   ├── utils/           # Logger, errors, geospatial helpers
+│   │   └── validators/      # Request validation schemas
+│   ├── uploads/             # Local image storage
+│   └── package.json
+│
+├── README.md
+└── package.json             # Root workspace config
 ```
 
----
+## Getting Started
 
-## Backend
+### Prerequisites
 
-```
-server/
- ├── models/
- │    ├── User.js
- │    ├── Room.js
- │    └── Message.js
- ├── routes/
- ├── controllers/
- ├── middleware/
- └── server.js
-```
+- Node.js 18+
+- MongoDB instance (local or Atlas)
 
----
+### 1. Clone the repo
 
-# 🔄 Application Flow
-
-## 1. User Authentication
-
-* User logs in via Firebase
-* Unique UID is generated
-
-## 2. Profile Setup
-
-* User creates profile with preferences
-* Profile stored in MongoDB
-
-## 3. Matching System
-
-* Backend compares users
-* Returns best matches
-
-## 4. Room Listings
-
-* Users can post rooms
-* Other users can browse listings
-
-## 5. Chat
-
-* Users can connect and communicate
-
----
-
-# 📸 Image Upload
-
-* Profile images and room images are uploaded using Multer
-* Stored locally in `/uploads` folder
-* Served via Express static middleware
-
----
-
-# ⚠️ Limitations
-
-* Images stored locally (not cloud-based)
-* No real-time chat (REST only)
-* Matching logic is basic (rule-based)
-
----
-
-# 🚀 Future Improvements
-
-* Real-time chat using WebSockets (Socket.IO)
-* Cloud storage (AWS S3 / Cloudinary)
-* AI-based roommate recommendations
-* Map-based room discovery
-* User verification system
-
----
-
-# 🧠 Key Concepts Used
-
-* REST API
-* Authentication & Authorization
-* File Upload Handling
-* Matching Algorithm
-* Component-Based UI Design
-
----
-
-# ⚙️ Installation & Setup
-
-## 1. Clone Repository
-
-```
+```bash
 git clone https://github.com/your-username/nestmate.git
 cd nestmate
 ```
 
-## 2. Install Dependencies
+### 2. Backend setup
 
-```
+```bash
+cd backend
+cp .env.example .env   # fill in your MongoDB URI and JWT secret
 npm install
+npm run dev            # starts on http://localhost:5000 with nodemon
 ```
 
-## 3. Run Frontend
+### 3. Frontend setup
 
-```
-npm run dev
-```
+Open a new terminal:
 
-## 4. Run Backend
-
-```
-cd server
+```bash
+cd frontend
 npm install
-npm start
+npm run dev            # starts Vite dev server, usually on http://localhost:5173
 ```
 
----
+## Environment Variables
 
-# 📌 Conclusion
+Create a `.env` file inside `backend/` with at least the following:
 
-Nestmate is a scalable and modular platform that demonstrates how modern web applications can combine **user matching, listings, and communication systems** into a unified solution.
+```
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_random_secret_key
+CORS_ORIGIN=http://localhost:5173
+```
 
----
+## API Overview
 
-# 👨‍💻 Author
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/register` | — | Create account |
+| POST | `/api/auth/login` | — | Login, receive JWT |
+| GET | `/api/listings/search` | — | Search and filter listings |
+| POST | `/api/listings` | Required | Post a new room |
+| GET | `/api/listings/:id` | — | Get single listing |
+| POST | `/api/reviews` | Required | Submit a review |
+| GET | `/api/reviews` | — | Get reviews for a room/user |
+| POST | `/api/matches` | Required | Get compatibility matches |
 
-Sahil
-B.Tech Student | Aspiring Full Stack Developer
+## Notes
+
+- Images are stored locally in `backend/src/uploads/` via Multer. If you deploy to production, you'll likely want to swap this for cloud storage like S3 or Cloudinary.
+- The matching engine uses rule-based scoring right now. It's modular enough to plug in more advanced logic later if needed.
+- Socket.io handles chat events under the same server instance as the REST API, so only one port needs to be exposed.
+
+## Author
+
+**Sahil** — B.Tech student and full-stack developer.
+
+Feel free to open an issue or PR if something breaks or you want to add a feature.
 
