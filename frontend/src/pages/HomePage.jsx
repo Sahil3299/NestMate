@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, IndianRupee, Users, CheckCircle, Shield, Award } from 'lucide-react';
 import ListingCard from '../components/ListingCard';
+import bgImage from '../assets/Bg.png';
 
 // Dummy data
 const DUMMY_LISTINGS = [
@@ -72,16 +73,22 @@ export default function HomePage() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-slate-50 to-teal-50">
-        <div className="container-max">
+      <section
+        className="relative py-16 md:py-24 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-slate-900/60" />
+
+        <div className="container-max relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-12 animate-fadeIn">
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-4 leading-tight">
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
               Find Your Perfect Flatmate in{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-500">
+              <span className="text-teal-300">
                 {searchCity}
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-600 mb-8">
+            <p className="text-lg md:text-xl text-white/90 mb-8 drop-shadow-md">
               Discover verified flatmates and rooms with zero brokerage. Safe, transparent, and stress-free.
             </p>
           </div>
@@ -142,19 +149,19 @@ export default function HomePage() {
           {/* Trust Badges */}
           <div className="mt-16 grid grid-cols-3 gap-4 md:gap-8 max-w-3xl mx-auto">
             <div className="text-center p-4 md:p-6">
-              <Award className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-600 mb-2" />
-              <p className="font-semibold text-slate-900 text-lg md:text-xl">10,000+</p>
-              <p className="text-sm text-slate-600">Verified Listings</p>
+              <Award className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-300 mb-2" />
+              <p className="font-semibold text-white text-lg md:text-xl">10,000+</p>
+              <p className="text-sm text-white/80">Verified Listings</p>
             </div>
             <div className="text-center p-4 md:p-6">
-              <CheckCircle className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-600 mb-2" />
-              <p className="font-semibold text-slate-900 text-lg md:text-xl">Zero Brokerage</p>
-              <p className="text-sm text-slate-600">Direct Connect</p>
+              <CheckCircle className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-300 mb-2" />
+              <p className="font-semibold text-white text-lg md:text-xl">Zero Brokerage</p>
+              <p className="text-sm text-white/80">Direct Connect</p>
             </div>
             <div className="text-center p-4 md:p-6">
-              <Shield className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-600 mb-2" />
-              <p className="font-semibold text-slate-900 text-lg md:text-xl">100% Safe</p>
-              <p className="text-sm text-slate-600">Verified Profiles</p>
+              <Shield className="w-8 h-8 md:w-10 md:h-10 mx-auto text-teal-300 mb-2" />
+              <p className="font-semibold text-white text-lg md:text-xl">100% Safe</p>
+              <p className="text-sm text-white/80">Verified Profiles</p>
             </div>
           </div>
         </div>
