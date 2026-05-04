@@ -127,5 +127,4 @@ CORS_ORIGIN=http://localhost:5173
 
 **Sahil** — B.Tech student and full-stack developer.
 
-Feel free to open an issue or PR if something breaks or you want to add a feature.
 
