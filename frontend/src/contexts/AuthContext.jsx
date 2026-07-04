@@ -18,18 +18,19 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem("nestmate_token");
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("nestmate_token");
       if (!token) {
         setUser(null);
         setLoading(false);
         return;
       }
 
-      const res = await api.get("/api/auth/me");
-      setUser(res.data.user || null);
+      const res = await api.get("/api/v1/users/me");
+      setUser(res.data.data || null);
       setLoading(false);
     } catch (err) {
       // Token invalid/expired
+      localStorage.removeItem("accessToken");
       localStorage.removeItem("nestmate_token");
       setUser(null);
       setLoading(false);
@@ -37,6 +38,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("nestmate_token");
     setUser(null);
   }, []);
@@ -48,4 +50,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-

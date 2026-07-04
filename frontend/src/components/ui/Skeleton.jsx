@@ -1,8 +1,7 @@
 // frontend/src/components/ui/Skeleton.jsx
-import { cn } from "@/utils/cn";
 
-export const Skeleton = ({ className }) => (
-  <div className={cn("animate-pulse rounded-lg bg-gray-200", className)} />
+export const Skeleton = ({ className = '' }) => (
+  <div className={`animate-pulse rounded-lg bg-gray-200 ${className}`} />
 );
 
 export const ListingCardSkeleton = () => (

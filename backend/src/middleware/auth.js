@@ -17,7 +17,8 @@ const authenticate = (req, res, next) => {
     const token = authHeader.replace("Bearer ", "").trim();
 
     const decoded = jwt.verify(token, env.JWT_SECRET);
-    req.user = { id: decoded.userId, email: decoded.email, role: decoded.role };
+    const userId = decoded.userId || decoded.id;
+    req.user = { id: userId, _id: userId, email: decoded.email, role: decoded.role };
 
     next();
   } catch (error) {
@@ -69,7 +70,8 @@ const optionalAuth = (req, res, next) => {
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "").trim();
       const decoded = jwt.verify(token, env.JWT_SECRET);
-      req.user = { id: decoded.userId, email: decoded.email, role: decoded.role };
+      const userId = decoded.userId || decoded.id;
+      req.user = { id: userId, _id: userId, email: decoded.email, role: decoded.role };
     }
   } catch (error) {
     // Silently ignore errors, continue without user
@@ -89,4 +91,3 @@ module.exports = {
   optionalAuth,
   requireAuth, // backwards compat
 };
-

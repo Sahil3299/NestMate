@@ -65,7 +65,7 @@ const createReview = asyncHandler(async (req, res) => {
 
 /**
  * Get reviews for a target (room or user)
- * GET /api/v1/reviews?targetType=user&targetId=123
+ * Supports both query params and path params depending on route.
  */
 const getReviewsForTarget = asyncHandler(async (req, res) => {
   const { targetType, targetId, page = 1, limit = 20 } = req.query;
@@ -134,6 +134,22 @@ const getReviewsForTarget = asyncHandler(async (req, res) => {
   });
 });
 
+// Adapter for routes that pass target values as path params
+const getReviews = asyncHandler(async (req, res) => {
+  // move path params into query so we can reuse the same logic
+  req.query.targetType = req.params.targetType;
+  req.query.targetId = req.params.targetId;
+  return getReviewsForTarget(req, res);
+});
+
+// Get single review by id
+const getReviewById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const review = await Review.findById(id).populate("reviewerId", "name email avatar");
+  if (!review) throw new NotFoundError("Review not found");
+  res.json({ success: true, data: review });
+});
+
 /**
  * Get reviews written by current user
  * GET /api/v1/reviews/my-reviews
@@ -189,6 +205,8 @@ const deleteReview = asyncHandler(async (req, res) => {
 module.exports = {
   createReview,
   getReviewsForTarget,
+  getReviews,
+  getReviewById,
   getMyReviews,
   deleteReview,
 };

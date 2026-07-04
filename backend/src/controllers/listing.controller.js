@@ -169,3 +169,44 @@ exports.getMyListings = catchAsync(async (req, res) => {
   const listings = await Listing.find({ owner: req.user._id }).sort({ createdAt: -1 });
   sendResponse(res, 200, "Your listings.", listings);
 });
+
+// ── Get listing analytics (views, saves, contacts) ───────────────────────────
+exports.getListingAnalytics = catchAsync(async (req, res, next) => {
+  const listing = await Listing.findById(req.params.id);
+  if (!listing) return next(new AppError("Listing not found.", 404));
+
+  // Only owner or admin can view analytics
+  if (listing.owner.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    return next(new AppError("You can only view analytics for your own listings.", 403));
+  }
+
+  const analytics = {
+    listingId: listing._id,
+    title: listing.title,
+    views: listing.views || 0,
+    saves: listing.savedBy?.length || 0,
+    visits: (listing.visitRequests || []).length,
+    reviews: listing.reviews?.length || 0,
+    avgRating: listing.avgRating || 0,
+    createdAt: listing.createdAt,
+    lastViewed: listing.lastViewedAt,
+  };
+
+  sendResponse(res, 200, "Listing analytics.", analytics);
+});
+
+// ── Increment view count ─────────────────────────────────────────────────────
+exports.incrementViews = catchAsync(async (req, res, next) => {
+  const listing = await Listing.findByIdAndUpdate(
+    req.params.id,
+    {
+      $inc: { views: 1 },
+      lastViewedAt: new Date(),
+    },
+    { new: true }
+  );
+
+  if (!listing) return next(new AppError("Listing not found.", 404));
+
+  sendResponse(res, 200, "View count updated.", { views: listing.views });
+});

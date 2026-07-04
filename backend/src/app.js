@@ -9,12 +9,15 @@ const env = require("./config/environment");
 const { AppError } = require("./utils/errors");
 
 // Routes
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/users");
-const listingRoutes = require("./routes/listings");
-const messageRoutes = require("./routes/messages");
-const reviewRoutes = require("./routes/reviews");
-const matchRoutes = require("./routes/matches");
+const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
+const listingRoutes = require("./routes/listing.routes");
+const messageRoutes = require("./routes/message.routes");
+const reviewRoutes = require("./routes/review.routes");
+const matchRoutes = require("./routes/match.routes");
+const notificationRoutes = require("./routes/notification.routes");
+const visitRoutes = require("./routes/visit.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 function createApp() {
   const app = express();
@@ -60,6 +63,9 @@ function createApp() {
   app.use(`${env.API_PREFIX}/messages`, messageRoutes);
   app.use(`${env.API_PREFIX}/reviews`, reviewRoutes);
   app.use(`${env.API_PREFIX}/matches`, matchRoutes);
+  app.use(`${env.API_PREFIX}/notifications`, notificationRoutes);
+  app.use(`${env.API_PREFIX}/visit-requests`, visitRoutes);
+  app.use(`${env.API_PREFIX}/admin`, adminRoutes);
 
   // ═════════════════════════════════════════════════════════════════════════
   // ERROR HANDLING

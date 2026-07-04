@@ -116,6 +116,18 @@ async function startServer() {
     // START SERVER
     // ═════════════════════════════════════════════════════════════════════════
 
+    server.on("error", (error) => {
+      if (error.code === "EADDRINUSE") {
+        console.error(
+          `Port ${env.PORT} is already in use. Stop the existing backend process or set PORT to another value.`
+        );
+        process.exit(1);
+      }
+
+      console.error("Server error:", error);
+      process.exit(1);
+    });
+
     server.listen(env.PORT, () => {
       console.log("\n" + "═".repeat(70));
       console.log("🚀 NestMate Backend Server Started");
@@ -161,5 +173,4 @@ async function startServer() {
 
 // Start the server
 startServer();
-
 
