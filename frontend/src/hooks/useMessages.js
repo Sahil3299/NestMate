@@ -1,7 +1,7 @@
 // frontend/src/hooks/useMessages.js
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { messageApi } from "@/services/api";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/Toast";
 
 export const MESSAGE_KEYS = {
@@ -20,7 +20,13 @@ export const useInbox = () =>
 export const useConversation = (userId) =>
   useQuery({
     queryKey: MESSAGE_KEYS.conversation(userId),
-    queryFn:  () => messageApi.getConversation(userId).then((r) => r.data.data),
+    queryFn:  () =>
+      messageApi.getConversation(userId).then((r) =>
+        (r.data.data || []).map((msg) => ({
+          ...msg,
+          content: msg.content || msg.message,
+        }))
+      ),
     enabled:  !!userId,
     refetchInterval: 10_000,
   });
@@ -51,7 +57,7 @@ export const useSendMessage = (receiverId) => {
       const optimistic = {
         _id:       `optimistic-${Date.now()}`,
         content,
-        sender:    { _id: user._id, name: user.name, avatar: user.avatar },
+        sender:    { _id: user._id, name: user.name, profileImage: user.profileImage },
         receiver:  { _id: receiverId },
         createdAt: new Date().toISOString(),
         isRead:    false,

@@ -1,13 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Upload, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { listingApi } from '../services/api';
 
 const ROOM_TYPES = ['1BHK', '2BHK', '3BHK', 'Studio', 'PG'];
 const CITIES = ['Mumbai', 'Pune', 'Bangalore', 'Thane', 'Delhi', 'Hyderabad'];
 
 export default function PostRoomPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [images, setImages] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     city: '', locality: '', rent: '', roomType: '', bhk: '',
     genderPreference: '', foodHabit: '', occupation: '',
@@ -32,26 +36,48 @@ export default function PostRoomPage() {
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (file && images.length < 5) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImages((prev) => [...prev, event.target?.result]);
-      };
-      reader.readAsDataURL(file);
+      const preview = URL.createObjectURL(file);
+      setImages((prev) => [...prev, { file, preview }]);
     }
   };
 
   const removeImage = (index) => {
+    const removed = images[index];
+    if (removed?.preview) URL.revokeObjectURL(removed.preview);
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success('Room posted successfully!');
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append('title', `${formData.roomType} in ${formData.city}`);
+      fd.append('description', formData.description);
+      fd.append('rent', formData.rent);
+      fd.append('city', formData.city);
+      if (formData.locality) fd.append('locality', formData.locality);
+      fd.append('roomType', formData.roomType);
+      if (formData.genderPreference) fd.append('genderPreference', formData.genderPreference);
+      formData.amenities.forEach((a) => fd.append('amenities', a));
+      images.forEach((img) => fd.append('images', img.file));
+
+      await listingApi.create(fd);
+      toast.success('Room posted successfully!');
+      navigate('/browse');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to post room. Please try again.';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isStep1Valid = formData.city && formData.locality && formData.rent && formData.roomType;
   const isStep2Valid = formData.genderPreference && formData.foodHabit;
-  const isStep3Valid = images.length > 0 && formData.description.length >= 20;
+  const isStep3Valid = formData.description.length >= 20;
 
   return (
     <div className="py-8 md:py-12 bg-gradient-to-br from-[#FAFAFA] to-teal-50/40 min-h-screen">
@@ -134,10 +160,9 @@ export default function PostRoomPage() {
                   <label className="block text-sm font-semibold text-[#0F172A] mb-2">Gender Preference *</label>
                   <select name="genderPreference" value={formData.genderPreference} onChange={handleInputChange} className="input">
                     <option value="">Select preference</option>
-                    <option value="any">Any</option>
-                    <option value="male">Male only</option>
-                    <option value="female">Female only</option>
-                    <option value="couples">Couples friendly</option>
+                    <option value="Male">Any</option>
+                    <option value="Male">Male only</option>
+                    <option value="Female">Female only</option>
                   </select>
                 </div>
                 <div>
@@ -192,10 +217,10 @@ export default function PostRoomPage() {
               <h2 className="font-display text-2xl font-bold text-[#0F172A]">Photos &amp; Description</h2>
 
               <div>
-                <label className="block text-sm font-semibold text-[#0F172A] mb-4">Upload Photos *</label>
+                <label className="block text-sm font-semibold text-[#0F172A] mb-4">Upload Photos</label>
                 <div className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-8 text-center hover:bg-slate-50 transition-colors">
                   <Upload className="w-8 h-8 text-[#94a3b8] mx-auto mb-2" />
-                  <p className="text-sm text-[#64748B] mb-4">Drag and drop images here or click to browse</p>
+                  <p className="text-sm text-[#64748B] mb-4">Upload images of your room</p>
                   <input type="file" accept="image/*" onChange={handleImageUpload} disabled={images.length >= 5} className="hidden" id="image-upload" />
                   <label htmlFor="image-upload" className="btn-primary text-sm cursor-pointer inline-flex">
                     <Upload size={16} />
@@ -207,7 +232,7 @@ export default function PostRoomPage() {
                   <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4">
                     {images.map((img, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={img} alt="Preview" className="w-full h-32 object-cover rounded-xl" />
+                        <img src={img.preview} alt="Preview" className="w-full h-32 object-cover rounded-xl" />
                         <button type="button" onClick={() => removeImage(idx)}
                           className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
                           <X size={14} />
@@ -243,9 +268,9 @@ export default function PostRoomPage() {
                 <button type="button" onClick={() => setStep(2)} className="btn-ghost flex items-center gap-2">
                   <ChevronLeft size={16} /> Back
                 </button>
-                <button type="submit" disabled={!isStep3Valid}
-                  className={`btn ${isStep3Valid ? 'btn-primary' : 'opacity-50 cursor-not-allowed'}`}>
-                  Post Room
+                <button type="submit" disabled={!isStep3Valid || submitting}
+                  className={`btn ${isStep3Valid && !submitting ? 'btn-primary' : 'opacity-50 cursor-not-allowed'}`}>
+                  {submitting ? 'Posting...' : 'Post Room'}
                 </button>
               </div>
             </div>

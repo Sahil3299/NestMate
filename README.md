@@ -116,6 +116,7 @@ CORS_ORIGIN=http://localhost:5173
 | POST | `/api/reviews` | Required | Submit a review |
 | GET | `/api/reviews` | — | Get reviews for a room/user |
 | POST | `/api/matches` | Required | Get compatibility matches |
+<<<<<<< HEAD
 
 ## Notes
 
@@ -128,4 +129,17 @@ CORS_ORIGIN=http://localhost:5173
 **Sahil** — B.Tech student and full-stack developer.
 
 Feel free to open an issue or PR if something breaks or you want to add a feature.
+=======
+
+## Notes
+
+- Images are stored locally in `backend/src/uploads/` via Multer. If you deploy to production, you'll likely want to swap this for cloud storage like S3 or Cloudinary.
+- The matching engine uses rule-based scoring right now. It's modular enough to plug in more advanced logic later if needed.
+- Socket.io handles chat events under the same server instance as the REST API, so only one port needs to be exposed.
+
+## Author
+
+**Sahil** — B.Tech student and full-stack developer.
+
+>>>>>>> 08aeeab63ce4cd596778ac9082bace1f2feee945
 

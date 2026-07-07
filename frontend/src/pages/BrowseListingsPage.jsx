@@ -2,51 +2,53 @@ import { useState, useEffect } from 'react';
 import { X, MapPin, Home, IndianRupee, SlidersHorizontal, Search, Building, RotateCcw } from 'lucide-react';
 import ListingCard from '../components/ListingCard';
 import { ListingCardSkeleton } from '../components/ui/Skeleton';
+import { listingApi } from '../services/api';
 
 const DUMMY_LISTINGS = [
   {
-    id: 1, title: '1BHK in Bandra', locality: 'Bandra West', city: 'Mumbai', price: 25000,
-    roomType: '1BHK', image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop',
+    _id: 'dummy-1', title: '1BHK in Bandra', locality: 'Bandra West', city: 'Mumbai', rent: 25000,
+    roomType: '1BHK', images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop'],
     matchScore: 92, preferences: ['Vegetarian', 'Non-smoker', 'Female only'],
-    gender: 'Female', available: true, owner: { id: 1, name: 'Priya Singh', avatar: 'PS' }
+    genderPreference: 'Female', availability: true, owner: { _id: 'owner-1', name: 'Priya Singh' }
   },
   {
-    id: 2, title: '2BHK in Powai', locality: 'Powai', city: 'Mumbai', price: 35000,
-    roomType: '2BHK', image: 'https://images.unsplash.com/photo-1501699686415-ba1eb9e88213?w=600&h=400&fit=crop',
+    _id: 'dummy-2', title: '2BHK in Powai', locality: 'Powai', city: 'Mumbai', rent: 35000,
+    roomType: '2BHK', images: ['https://images.unsplash.com/photo-1501699686415-ba1eb9e88213?w=600&h=400&fit=crop'],
     matchScore: 85, preferences: ['Professional', 'Early sleeper'],
-    gender: 'Male', available: true, owner: { id: 2, name: 'Rajesh Kumar', avatar: 'RK' }
+    genderPreference: 'Male', availability: true, owner: { _id: 'owner-2', name: 'Rajesh Kumar' }
   },
   {
-    id: 3, title: 'Studio in Koregaon Park', locality: 'Koregaon Park', city: 'Pune', price: 15000,
-    roomType: 'Studio', image: 'https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=600&h=400&fit=crop',
+    _id: 'dummy-3', title: 'Studio in Koregaon Park', locality: 'Koregaon Park', city: 'Pune', rent: 15000,
+    roomType: 'Studio', images: ['https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=600&h=400&fit=crop'],
     matchScore: 88, preferences: ['Student', 'Non-smoker'],
-    gender: 'Any', available: false, owner: { id: 3, name: 'Neha Patel', avatar: 'NP' }
+    genderPreference: 'Any', availability: false, owner: { _id: 'owner-3', name: 'Neha Patel' }
   },
   {
-    id: 4, title: '3BHK in Whitefield', locality: 'Whitefield', city: 'Bangalore', price: 45000,
-    roomType: '3BHK', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop',
+    _id: 'dummy-4', title: '3BHK in Whitefield', locality: 'Whitefield', city: 'Bangalore', rent: 45000,
+    roomType: '3BHK', images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop'],
     matchScore: 90, preferences: ['Professional', 'Vegetarian'],
-    gender: 'Any', available: true, owner: { id: 4, name: 'Amit Shah', avatar: 'AS' }
+    genderPreference: 'Any', availability: true, owner: { _id: 'owner-4', name: 'Amit Shah' }
   },
   {
-    id: 5, title: 'PG in Dadar', locality: 'Dadar', city: 'Mumbai', price: 12000,
-    roomType: 'PG', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop',
+    _id: 'dummy-5', title: 'PG in Dadar', locality: 'Dadar', city: 'Mumbai', rent: 12000,
+    roomType: 'PG', images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop'],
     matchScore: 78, preferences: ['Student friendly', 'WiFi included'],
-    gender: 'Any', available: true, owner: { id: 5, name: 'Sneha Rao', avatar: 'SR' }
+    genderPreference: 'Any', availability: true, owner: { _id: 'owner-5', name: 'Sneha Rao' }
   },
   {
-    id: 6, title: '1BHK in Indiranagar', locality: 'Indiranagar', city: 'Bangalore', price: 20000,
-    roomType: '1BHK', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop',
+    _id: 'dummy-6', title: '1BHK in Indiranagar', locality: 'Indiranagar', city: 'Bangalore', rent: 20000,
+    roomType: '1BHK', images: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop'],
     matchScore: 86, preferences: ['Young professional', 'Non-smoker'],
-    gender: 'Male', available: true, owner: { id: 6, name: 'Vikram Joshi', avatar: 'VJ' }
+    genderPreference: 'Male', availability: true, owner: { _id: 'owner-6', name: 'Vikram Joshi' }
   },
 ];
 
-const CITIES = ['All Cities', 'Mumbai', 'Pune', 'Bangalore', 'Thane', 'Delhi'];
+const CITIES = ['All Cities', 'Mumbai', 'Pune', 'Bangalore', 'Thane', 'Delhi', 'Hyderabad'];
 const ROOM_TYPES = ['All', '1BHK', '2BHK', '3BHK', 'Studio', 'PG'];
 
 export default function BrowseListingsPage() {
   const [loading, setLoading] = useState(true);
+  const [listings, setListings] = useState([]);
   const [filters, setFilters] = useState({
     city: 'All Cities',
     budgetMin: 0,
@@ -56,13 +58,27 @@ export default function BrowseListingsPage() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    const fetchListings = async () => {
+      try {
+        const res = await listingApi.getAll();
+        const data = res.data.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setListings(data);
+        } else {
+          setListings(DUMMY_LISTINGS);
+        }
+      } catch (err) {
+        setListings(DUMMY_LISTINGS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchListings();
   }, []);
 
-  const filteredListings = DUMMY_LISTINGS.filter((listing) => {
+  const filteredListings = listings.filter((listing) => {
     if (filters.city !== 'All Cities' && listing.city !== filters.city) return false;
-    if (listing.price < filters.budgetMin || listing.price > filters.budgetMax) return false;
+    if (listing.rent < filters.budgetMin || listing.rent > filters.budgetMax) return false;
     if (filters.roomType !== 'All' && listing.roomType !== filters.roomType) return false;
     return true;
   });
@@ -215,7 +231,25 @@ export default function BrowseListingsPage() {
             ) : filteredListings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredListings.map((listing) => (
-                  <ListingCard key={listing.id} {...listing} />
+                  <ListingCard
+                    key={listing._id}
+                    id={listing._id}
+                    title={listing.title}
+                    locality={listing.locality}
+                    city={listing.city}
+                    price={listing.rent}
+                    roomType={listing.roomType}
+                    image={listing.images?.[0] || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop'}
+                    matchScore={listing.matchScore || 90}
+                    preferences={listing.preferences || []}
+                    gender={listing.genderPreference}
+                    available={listing.availability !== false}
+                    owner={listing.owner ? {
+                      name: listing.owner.name,
+                      avatar: listing.owner.name?.charAt(0) || 'U',
+                      id: listing.owner._id
+                    } : null}
+                  />
                 ))}
               </div>
             ) : (

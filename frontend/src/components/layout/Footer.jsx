@@ -41,7 +41,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-2">
             <Link to="/" className="flex items-center gap-2.5 mb-4 group">
-              <img src={logo} alt="NestMate" className="h-10 w-auto" />
+              <img src={logo} alt="NestMate" className="h-16 w-26" />
               <span className="font-display font-bold text-xl text-[#0F172A] tracking-tight">NestMate</span>
             </Link>
             <p className="text-sm text-[#64748B] leading-relaxed mb-6 max-w-xs">

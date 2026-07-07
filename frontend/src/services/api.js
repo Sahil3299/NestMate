@@ -15,11 +15,9 @@ export const authApi = {
 // ── Users ─────────────────────────────────────────────────────────────────
 export const userApi = {
   getMe:          ()           => apiClient.get("/users/me"),
-  updateProfile:  (formData)   => apiClient.patch("/users/me", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  }),
-  getSaved:       ()           => apiClient.get("/users/me/saved"),
-  toggleSave:     (listingId)  => apiClient.post(`/users/me/saved/${listingId}`),
+  updateProfile:  (data)   => apiClient.patch("/users/me", data),
+  getSaved:       ()           => apiClient.get("/users/saved"),
+  toggleSave:     (listingId)  => apiClient.post(`/users/saved/${listingId}`),
   getPublicProfile: (id)       => apiClient.get(`/users/${id}`),
 };
 

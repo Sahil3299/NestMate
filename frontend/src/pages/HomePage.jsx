@@ -11,7 +11,7 @@ import sharedLiving from '../assets/shared_living_space.png';
 
 const DUMMY_LISTINGS = [
   {
-    id: 1,
+    id: 'dummy-1',
     title: 'Premium 1BHK in Bandra West',
     locality: 'Bandra West',
     city: 'Mumbai',
@@ -22,10 +22,10 @@ const DUMMY_LISTINGS = [
     preferences: ['Vegetarian', 'Non-smoker', 'Female only'],
     gender: 'Female',
     available: true,
-    owner: { id: 1, name: 'Priya Singh', avatar: 'PS' }
+    owner: { id: 'owner-1', name: 'Priya Singh', avatar: 'PS' }
   },
   {
-    id: 2,
+    id: 'dummy-2',
     title: 'Spacious 2BHK with Sea View',
     locality: 'Powai',
     city: 'Mumbai',
@@ -36,10 +36,10 @@ const DUMMY_LISTINGS = [
     preferences: ['Professional', 'Early sleeper'],
     gender: 'Male',
     available: true,
-    owner: { id: 2, name: 'Rajesh Kumar', avatar: 'RK' }
+    owner: { id: 'owner-2', name: 'Rajesh Kumar', avatar: 'RK' }
   },
   {
-    id: 3,
+    id: 'dummy-3',
     title: 'Cozy Studio near Koregaon Park',
     locality: 'Koregaon Park',
     city: 'Pune',
@@ -50,7 +50,7 @@ const DUMMY_LISTINGS = [
     preferences: ['Student', 'Non-smoker'],
     gender: 'Any',
     available: false,
-    owner: { id: 3, name: 'Neha Patel', avatar: 'NP' }
+    owner: { id: 'owner-3', name: 'Neha Patel', avatar: 'NP' }
   },
 ];
 

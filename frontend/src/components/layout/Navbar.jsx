@@ -31,7 +31,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <img src={logo} alt="NestMate" className="h-10 w-auto" />
+            <img src={logo} alt="NestMate" className="h-16 w-26" />
             <span className="font-display font-bold text-xl text-[#0F172A] tracking-tight">NestMate</span>
           </Link>
 

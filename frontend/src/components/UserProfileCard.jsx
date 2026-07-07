@@ -1,22 +1,28 @@
 import { MessageCircle, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserProfileCard({
-  name, age, profession, city, bio, avatar,
+  name, age, profession, occupation, city, bio,
+  avatar, profileImage,
   preferences = [], rating = 4.8, reviews = 12,
+  userId,
 }) {
+  const navigate = useNavigate();
+  const displayAvatar = avatar || profileImage || name?.charAt(0)?.toUpperCase();
+  const displayProfession = profession || occupation;
   const compatibilityScore = 92;
 
   return (
     <div className="card overflow-hidden">
       <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-6 pb-20 relative">
         <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-[#14B8A6] to-[#0F766E] flex items-center justify-center text-white font-display text-3xl font-bold shadow-lg mb-4">
-          {avatar || name?.charAt(0).toUpperCase()}
+          {displayAvatar}
         </div>
       </div>
 
       <div className="px-6 py-6 -mt-10">
         <h3 className="font-display text-xl font-bold text-[#0F172A] mb-1">{name}</h3>
-        <p className="text-sm text-[#64748B] mb-4">{age} &bull; {profession} &bull; {city}</p>
+        <p className="text-sm text-[#64748B] mb-4">{age && `${age} \u2022 `}{displayProfession}{displayProfession && city ? ' \u2022 ' : ''}{city}</p>
 
         {bio && <p className="text-sm text-[#64748B] mb-4 leading-relaxed">{bio}</p>}
 
@@ -60,7 +66,10 @@ export default function UserProfileCard({
           </div>
         )}
 
-        <button className="w-full btn-primary flex items-center justify-center gap-2">
+        <button
+          onClick={() => userId && navigate(`/messages/${userId}`)}
+          className="w-full btn-primary flex items-center justify-center gap-2"
+        >
           <MessageCircle size={18} />
           Send Message
         </button>

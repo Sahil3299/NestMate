@@ -8,6 +8,7 @@ import BrowseListingsPage from './pages/BrowseListingsPage';
 import PostRoomPage from './pages/PostRoomPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import ChatPage from './pages/ChatPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 
@@ -39,6 +40,8 @@ export default function App() {
             <Route path="/browse/:id" element={<ListingDetailPage />} />
             <Route path="/post-room" element={<PostRoomPage />} />
             <Route path="/profile/:id" element={<ProfilePage />} />
+            <Route path="/chat/:userId?" element={<ChatPage />} />
+            <Route path="/messages/:userId?" element={<ChatPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

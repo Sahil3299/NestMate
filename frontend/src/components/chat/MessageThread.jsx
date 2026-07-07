@@ -1,17 +1,20 @@
 // frontend/src/components/chat/MessageThread.jsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/context/AuthContext";
-import { useConversation, useSendMessage } from "@/hooks/useMessages";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { useConversation, useSendMessage, MESSAGE_KEYS } from "@/hooks/useMessages";
 import { Avatar, Spinner, VerifiedBadge } from "@/components/ui";
 import { QueryError } from "@/components/ui/ErrorBoundary";
 import { messageSchema } from "@/validators/schemas";
 import { timeAgo } from "@/utils/formatters";
 import { cn } from "@/utils/cn";
+import { joinChat, onReceiveMessage, getSocket } from "@/lib/socket";
 
 export default function MessageThread({ partnerId, partnerName, partnerAvatar, partnerVerified }) {
   const { user }    = useAuth();
+  const queryClient = useQueryClient();
   const bottomRef   = useRef(null);
   const { data: messages = [], isLoading, isError, refetch } = useConversation(partnerId);
   const sendMessage = useSendMessage(partnerId);
@@ -19,6 +22,31 @@ export default function MessageThread({ partnerId, partnerName, partnerAvatar, p
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(messageSchema),
   });
+
+  useEffect(() => {
+    if (!partnerId) return;
+    try { joinChat(partnerId); } catch (e) { /* socket not ready */ }
+  }, [partnerId]);
+
+  const handleReceiveMessage = useCallback((msg) => {
+    const senderId = msg.sender?._id || msg.sender;
+    const receiverId = msg.receiver?._id || msg.receiver;
+    const isRelevant = String(senderId) === String(partnerId) || String(receiverId) === String(partnerId);
+    if (!isRelevant) return;
+
+    queryClient.setQueryData(MESSAGE_KEYS.conversation(partnerId), (old = []) => {
+      if (old.some((m) => m._id === msg._id)) return old;
+      return [...old, { ...msg, content: msg.content || msg.message }];
+    });
+  }, [partnerId, queryClient]);
+
+  useEffect(() => {
+    if (!partnerId) return;
+    const cleanup = onReceiveMessage(handleReceiveMessage);
+    return () => {
+      if (typeof cleanup === "function") cleanup();
+    };
+  }, [partnerId, handleReceiveMessage]);
 
   // Auto-scroll to bottom on new message
   useEffect(() => {
@@ -64,9 +92,11 @@ export default function MessageThread({ partnerId, partnerName, partnerAvatar, p
         ) : (
           messages.map((msg) => {
             const isMine = String(msg.sender?._id || msg.sender) === String(user?._id);
+            const senderAvatar = msg.sender?.profileImage || msg.sender?.avatar;
+            const msgContent = msg.content || msg.message || "";
             return (
               <div key={msg._id} className={cn("flex gap-2 items-end", isMine ? "flex-row-reverse" : "flex-row")}>
-                {!isMine && <Avatar src={msg.sender?.avatar} name={msg.sender?.name} size="sm" className="flex-shrink-0 mb-1" />}
+                {!isMine && <Avatar src={senderAvatar} name={msg.sender?.name} size="sm" className="flex-shrink-0 mb-1" />}
                 <div className={cn(
                   "max-w-[72%] rounded-2xl px-4 py-2.5 text-sm",
                   isMine
@@ -74,7 +104,7 @@ export default function MessageThread({ partnerId, partnerName, partnerAvatar, p
                     : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm",
                   msg._optimistic && "opacity-70"
                 )}>
-                  <p className="leading-relaxed">{msg.content}</p>
+                  <p className="leading-relaxed">{msgContent}</p>
                   <p className={cn("text-xs mt-1", isMine ? "text-blue-200" : "text-gray-400")}>
                     {timeAgo(msg.createdAt)}
                     {msg._optimistic && " · Sending…"}

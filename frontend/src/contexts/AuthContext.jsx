@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { api } from "../lib/api";
+import { initSocket, disconnectSocket } from "../lib/socket";
+
+let socketInitialized = false;
 
 const AuthContext = createContext({
   user: null,
@@ -14,6 +17,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     refreshUser();
+    return () => { disconnectSocket(); socketInitialized = false; };
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -28,6 +32,11 @@ export function AuthProvider({ children }) {
       const res = await api.get("/api/v1/users/me");
       setUser(res.data.data || null);
       setLoading(false);
+
+      if (!socketInitialized && res.data.data) {
+        initSocket();
+        socketInitialized = true;
+      }
     } catch (err) {
       // Token invalid/expired
       localStorage.removeItem("accessToken");
@@ -40,6 +49,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("nestmate_token");
+    socketInitialized = false;
+    disconnectSocket();
     setUser(null);
   }, []);
 
