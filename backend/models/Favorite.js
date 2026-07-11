@@ -9,7 +9,7 @@ const favoriteSchema = new mongoose.Schema(
     },
     room: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Room',
+      ref: 'Listing',
       required: true,
     },
   },

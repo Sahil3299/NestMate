@@ -8,12 +8,12 @@ exports.createListing = catchAsync(async (req, res, next) => {
 });
 
 exports.getListings = catchAsync(async (req, res, next) => {
-  const result = await listingService.getListings(req.query);
+  const result = await listingService.getListings(req.query, req.user);
   sendResponse(res, 200, result.listings, undefined, { pagination: result.pagination });
 });
 
 exports.getListingById = catchAsync(async (req, res, next) => {
-  const listing = await listingService.getListingById(req.params.id);
+  const listing = await listingService.getListingById(req.params.id, req.user);
   sendResponse(res, 200, listing);
 });
 

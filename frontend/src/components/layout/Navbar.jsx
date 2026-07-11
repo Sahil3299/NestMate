@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { House, Search, HelpCircle, PlusCircle, User, LogIn, LogOut, UserPlus, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,10 +6,17 @@ import logo from '../../assets/logo.png';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinks = [
     { label: 'Home', href: '/', icon: House },
@@ -26,17 +33,30 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-[#E2E8F0] h-[78px] flex items-center">
+    <nav
+      className={`sticky top-0 z-50 h-[72px] flex items-center transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm'
+          : 'bg-white border-b border-slate-200/40'
+      }`}
+    >
       <div className="container-max w-full">
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <img src={logo} alt="NestMate" className="h-16 w-26" />
-            <span className="font-display font-bold text-xl text-[#0F172A] tracking-tight">NestMate</span>
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
+            <img src={logo} alt="NestMate" className="h-14 w-auto" />
+            <div className="hidden sm:block">
+              <span className="font-display font-bold text-lg text-slate-900 tracking-tight leading-tight">
+                NestMate
+              </span>
+              <span className="block text-[10px] text-slate-400 font-medium tracking-widest uppercase -mt-0.5">
+                Find Your Match
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Nav - Centered */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -45,16 +65,16 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   onClick={() => handleNavClick(link.href)}
-                  className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-xl flex items-center gap-2 group ${
+                  className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 rounded-xl flex items-center gap-2 ${
                     active
-                      ? 'text-[#14B8A6] bg-teal-50/50'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'
+                      ? 'text-teal-600 bg-teal-50/80'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon size={16} className="shrink-0" />
+                  <Icon size={15} className="shrink-0" />
                   {link.label}
                   {active && (
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-[#14B8A6] to-[#0F766E] rounded-full" />
+                    <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full" />
                   )}
                 </Link>
               );
@@ -62,44 +82,48 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Right Side */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
+          <div className="hidden md:flex items-center gap-1.5 shrink-0">
             {user ? (
               <>
                 <Link
                   to={`/profile/${user._id || user.id}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all duration-200"
                 >
-                  <User size={16} />
-                  My Profile
+                  <div className="w-7 h-7 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="max-w-[100px] truncate">{user.name?.split(' ')[0] || 'Profile'}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#64748B] hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-200"
                 >
-                  <LogOut size={16} />
-                  Logout
+                  <LogOut size={15} />
                 </button>
               </>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all duration-200"
                 >
-                  <LogIn size={16} />
+                  <LogIn size={15} />
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#14B8A6] hover:bg-[#0F766E] rounded-xl transition-colors shadow-sm"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  <UserPlus size={16} />
+                  <UserPlus size={15} />
                   Sign Up
                 </Link>
               </>
             )}
-            <Link to="/post-room" className="btn-primary text-sm !px-5 !py-2.5">
-              <PlusCircle size={16} />
+            <Link
+              to="/post-room"
+              className="btn-primary text-sm !px-5 !py-2.5 !rounded-xl"
+            >
+              <PlusCircle size={15} />
               Post Free Ad
             </Link>
           </div>
@@ -110,14 +134,14 @@ export default function Navbar() {
             className="md:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-colors"
             aria-label="Toggle menu"
           >
-            {isOpen ? <X size={22} className="text-[#0F172A]" /> : <Menu size={22} className="text-[#0F172A]" />}
+            {isOpen ? <X size={22} className="text-slate-900" /> : <Menu size={22} className="text-slate-900" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="fixed top-[78px] left-0 right-0 bottom-0 bg-white z-40 md:hidden animate-slideDown overflow-y-auto">
+        <div className="fixed top-[72px] left-0 right-0 bottom-0 bg-white/95 backdrop-blur-xl z-40 md:hidden animate-fadeIn overflow-y-auto">
           <div className="container-max py-6 space-y-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -129,8 +153,8 @@ export default function Navbar() {
                   onClick={() => handleNavClick(link.href)}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all ${
                     active
-                      ? 'text-[#14B8A6] bg-teal-50'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'
+                      ? 'text-teal-600 bg-teal-50'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   <Icon size={18} className="shrink-0" />
@@ -139,20 +163,22 @@ export default function Navbar() {
               );
             })}
 
-            <div className="pt-4 mt-4 border-t border-[#E2E8F0] space-y-2">
+            <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
               {user ? (
                 <>
                   <Link
                     to={`/profile/${user._id || user.id}`}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 transition-all"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all"
                   >
-                    <User size={18} />
+                    <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
                     My Profile
                   </Link>
                   <button
                     onClick={() => { logout(); setIsOpen(false); }}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#64748B] hover:text-red-600 hover:bg-red-50 w-full transition-all text-left"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 w-full transition-all text-left"
                   >
                     <LogOut size={18} />
                     Logout
@@ -163,7 +189,7 @@ export default function Navbar() {
                   <Link
                     to="/login"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 transition-all"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all"
                   >
                     <LogIn size={18} />
                     Sign In
@@ -171,7 +197,7 @@ export default function Navbar() {
                   <Link
                     to="/signup"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-white bg-[#14B8A6] hover:bg-[#0F766E] transition-all"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 transition-all"
                   >
                     <UserPlus size={18} />
                     Sign Up

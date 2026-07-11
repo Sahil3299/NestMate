@@ -252,6 +252,7 @@ export default function ListingDetailPage() {
             <UserProfileCard
               {...listing.owner}
               userId={ownerId}
+              matchScore={listing.matchScore}
             />
 
             {/* Quick Actions */}

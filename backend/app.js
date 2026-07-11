@@ -10,6 +10,8 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('./config/passport');
 const env = require('./config/env');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/AppError');
 
@@ -74,6 +76,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Swagger docs
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Static files
 app.use('/uploads', express.static('uploads'));
 
@@ -82,6 +87,12 @@ app.use('/api/v1/auth', require('./routes/auth.routes'));
 app.use('/api/v1/users', require('./routes/user.routes'));
 app.use('/api/v1/listings', require('./routes/listing.routes'));
 app.use('/api/v1/messages', require('./routes/message.routes'));
+app.use('/api/v1/match', require('./routes/match.routes'));
+app.use('/api/v1/teams', require('./routes/team.routes'));
+app.use('/api/v1/reports', require('./routes/report.routes'));
+app.use('/api/v1/privacy', require('./routes/privacy.routes'));
+app.use('/api/v1/uploads', require('./routes/upload.routes'));
+app.use('/api/v1/cloudinary', require('./routes/cloudinary.routes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

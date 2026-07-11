@@ -18,7 +18,10 @@ exports.createListingValidator = [
   body('roomType')
     .trim()
     .notEmpty().withMessage('Room type is required')
-    .isIn(['1BHK', '2BHK', '3BHK', 'Studio', 'PG', 'Single Room']).withMessage('Invalid room type'),
+    .isIn(['Private', 'Shared', '1BHK', '2BHK', '3BHK', 'Studio', 'PG', 'Single Room']).withMessage('Invalid room type'),
+  body('type')
+    .optional()
+    .isIn(['room', 'flat', 'requirement']).withMessage('Invalid listing type'),
   body('genderPreference')
     .optional()
     .isIn(['Male', 'Female', 'Any']).withMessage('Invalid gender preference'),
@@ -34,6 +37,9 @@ exports.createListingValidator = [
   body('longitude')
     .optional()
     .isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude'),
+  body('deposit')
+    .optional()
+    .isFloat({ min: 0 }).withMessage('Deposit must be a positive number'),
 ];
 
 exports.updateListingValidator = [

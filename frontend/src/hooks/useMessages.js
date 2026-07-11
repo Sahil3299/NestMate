@@ -10,12 +10,21 @@ export const MESSAGE_KEYS = {
   unread:       ["messages", "unread"],
 };
 
-export const useInbox = () =>
-  useQuery({
+export const useInbox = () => {
+  const { user } = useAuth();
+  return useQuery({
     queryKey: MESSAGE_KEYS.inbox,
-    queryFn:  () => messageApi.getInbox().then((r) => r.data.data),
-    refetchInterval: 30_000, // poll every 30s
+    queryFn:  () =>
+      messageApi.getInbox().then((r) =>
+        (r.data.data || []).map((conv) => ({
+          ...conv,
+          user: conv.participants?.find((p) => String(p._id) !== String(user?._id)) || conv.participants?.[0],
+          unreadCount: conv.unreadCount || 0,
+        }))
+      ),
+    refetchInterval: 30_000,
   });
+};
 
 export const useConversation = (userId) =>
   useQuery({

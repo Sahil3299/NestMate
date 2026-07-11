@@ -15,10 +15,16 @@ export const authApi = {
 // ── Users ─────────────────────────────────────────────────────────────────
 export const userApi = {
   getMe:          ()           => apiClient.get("/users/me"),
-  updateProfile:  (data)   => apiClient.patch("/users/me", data),
+  updateProfile:  (data)       => apiClient.patch("/users/me", data),
+  editProfile:    (data)       => apiClient.patch("/users/edit", data),
   getSaved:       ()           => apiClient.get("/users/saved"),
   toggleSave:     (listingId)  => apiClient.post(`/users/saved/${listingId}`),
   getPublicProfile: (id)       => apiClient.get(`/users/${id}`),
+};
+
+// ── Cloudinary ────────────────────────────────────────────────────────────
+export const cloudinaryApi = {
+  signUpload: () => apiClient.post("/cloudinary/sign"),
 };
 
 // ── Listings ──────────────────────────────────────────────────────────────
@@ -26,20 +32,16 @@ export const listingApi = {
   getAll:     (params)      => apiClient.get("/listings", { params }),
   getOne:     (id)          => apiClient.get(`/listings/${id}`),
   getMine:    ()            => apiClient.get("/listings/mine"),
-  create:     (formData)    => apiClient.post("/listings", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  }),
-  update:     (id, formData) => apiClient.patch(`/listings/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  }),
+  create:     (formData)    => apiClient.post("/listings", formData),
+  update:     (id, formData) => apiClient.patch(`/listings/${id}`, formData),
   remove:     (id)           => apiClient.delete(`/listings/${id}`),
 };
 
 // ── Messages ──────────────────────────────────────────────────────────────
 export const messageApi = {
-  send:           (data)   => apiClient.post("/messages", data),
+  send:           (data)   => apiClient.post("/messages/send", data),
   getInbox:       ()       => apiClient.get("/messages/inbox"),
-  getConversation:(userId, params) => apiClient.get(`/messages/conversation/${userId}`, { params }),
+  getConversation:(userId) => apiClient.get(`/messages/with/${userId}`),
   getUnreadCount: ()       => apiClient.get("/messages/unread"),
 };
 

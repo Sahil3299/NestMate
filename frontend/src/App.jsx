@@ -11,6 +11,7 @@ import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import FloatingChatWidget from './components/chat/FloatingChatWidget';
 
 export default function App() {
   return (
@@ -28,7 +29,7 @@ export default function App() {
               fontSize: '14px',
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             },
-            success: { iconTheme: { primary: '#22C55E', secondary: '#fff' } },
+            success: { iconTheme: { primary: '#14B8A6', secondary: '#fff' } },
             error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
           }}
         />
@@ -48,6 +49,7 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
+        <FloatingChatWidget />
       </div>
     </AuthProvider>
   );

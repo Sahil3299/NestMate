@@ -30,6 +30,18 @@ exports.login = catchAsync(async (req, res, next) => {
   sendResponse(res, 200, { accessToken: result.accessToken, user: result.user }, 'Login successful');
 });
 
+exports.verifyOtp = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+  const user = await authService.verifyOtp(email, otp);
+  sendResponse(res, 200, { verified: true }, 'Email verified successfully');
+});
+
+exports.resendOtp = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  await authService.resendOtp(email);
+  sendResponse(res, 200, null, 'OTP resent successfully');
+});
+
 exports.logout = catchAsync(async (req, res, next) => {
   res.clearCookie('refreshToken');
   sendResponse(res, 200, null, 'Logged out successfully');

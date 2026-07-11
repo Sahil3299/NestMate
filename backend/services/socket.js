@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 const User = require('../models/User');
-const Message = require('../models/Message');
+const messageService = require('./message.service');
 
 const onlineUsers = new Map();
 
@@ -33,47 +33,55 @@ function setupSocket(io) {
 
     socket.broadcast.emit('user_online', userId);
 
-    socket.on('join_chat', (otherUserId) => {
-      const room = getChatRoom(userId, otherUserId);
-      socket.join(room);
+    socket.on('join_conversation', (conversationId) => {
+      socket.join(`conversation:${conversationId}`);
     });
 
-    socket.on('send_message', async ({ toUid, text }) => {
-      if (!toUid || !text?.trim()) return;
+    socket.on('leave_conversation', (conversationId) => {
+      socket.leave(`conversation:${conversationId}`);
+    });
+
+    socket.on('message:send', async ({ conversationId, content, type = 'text' }) => {
+      if (!conversationId || !content?.trim()) return;
 
       try {
-        const msg = await Message.create({
-          sender: userId,
-          receiver: toUid,
-          message: text.trim(),
+        const msg = await messageService.sendMessage({
+          conversationId,
+          senderId: userId,
+          content: content.trim(),
+          type,
         });
 
-        const populated = await Message.findById(msg._id)
-          .populate('sender', 'name profileImage')
-          .populate('receiver', 'name profileImage');
-
-        const room = getChatRoom(userId, toUid);
-        io.to(room).emit('receive_message', {
-          _id: populated._id,
-          content: populated.message,
-          sender: { _id: populated.sender._id, name: populated.sender.name, profileImage: populated.sender.profileImage },
-          receiver: { _id: populated.receiver._id, name: populated.receiver.name, profileImage: populated.receiver.profileImage },
-          createdAt: populated.createdAt,
-          read: populated.read,
-        });
+        io.to(`conversation:${conversationId}`).emit('message:receive', msg);
       } catch (err) {
         socket.emit('error_message', 'Failed to send message');
       }
     });
 
-    socket.on('typing', (otherUserId) => {
-      const room = getChatRoom(userId, otherUserId);
-      socket.to(room).emit('user_typing', userId);
+    socket.on('typing', ({ conversationId }) => {
+      socket.to(`conversation:${conversationId}`).emit('typing', {
+        userId,
+        conversationId,
+      });
     });
 
-    socket.on('stop_typing', (otherUserId) => {
-      const room = getChatRoom(userId, otherUserId);
-      socket.to(room).emit('user_stop_typing', userId);
+    socket.on('stop_typing', ({ conversationId }) => {
+      socket.to(`conversation:${conversationId}`).emit('stop_typing', {
+        userId,
+        conversationId,
+      });
+    });
+
+    socket.on('read:receipt', async ({ conversationId }) => {
+      try {
+        await messageService.markAsRead(conversationId, userId);
+        io.to(`conversation:${conversationId}`).emit('messages:read', {
+          conversationId,
+          readBy: userId,
+        });
+      } catch (err) {
+        // silently fail
+      }
     });
 
     socket.on('disconnect', () => {
@@ -91,8 +99,4 @@ function setupSocket(io) {
   return io;
 }
 
-function getChatRoom(uid1, uid2) {
-  return `chat:${[uid1, uid2].sort().join(':')}`;
-}
-
-module.exports = { setupSocket, onlineUsers, getChatRoom };
+module.exports = { setupSocket, onlineUsers };

@@ -1,45 +1,33 @@
 import { useState, useEffect } from 'react';
-import { X, MapPin, Home, IndianRupee, SlidersHorizontal, Search, Building, RotateCcw } from 'lucide-react';
+import { X, MapPin, Home, IndianRupee, SlidersHorizontal, Search, Building, RotateCcw, Users } from 'lucide-react';
 import ListingCard from '../components/ListingCard';
 import { ListingCardSkeleton } from '../components/ui/Skeleton';
 import { listingApi } from '../services/api';
 
 const DUMMY_LISTINGS = [
   {
-    _id: 'dummy-1', title: '1BHK in Bandra', locality: 'Bandra West', city: 'Mumbai', rent: 25000,
+    _id: 'dummy-1', title: '1BHK in Bandra', description: 'Lovely cozy room in the heart of Bandra West with great natural light and premium furniture.', locality: 'Bandra West', city: 'Mumbai', rent: 25000,
     roomType: '1BHK', images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop'],
     matchScore: 92, preferences: ['Vegetarian', 'Non-smoker', 'Female only'],
-    genderPreference: 'Female', availability: true, owner: { _id: 'owner-1', name: 'Priya Singh' }
+    genderPreference: 'Female', availability: true, owner: { _id: 'owner-1', name: 'Priya Singh' }, isBrokerageFree: true
   },
   {
-    _id: 'dummy-2', title: '2BHK in Powai', locality: 'Powai', city: 'Mumbai', rent: 35000,
+    _id: 'dummy-2', title: '2BHK in Powai', description: 'Shared roommate listing in beautiful highrise apartment overlooking Powai Lake.', locality: 'Powai', city: 'Mumbai', rent: 35000,
     roomType: '2BHK', images: ['https://images.unsplash.com/photo-1501699686415-ba1eb9e88213?w=600&h=400&fit=crop'],
     matchScore: 85, preferences: ['Professional', 'Early sleeper'],
-    genderPreference: 'Male', availability: true, owner: { _id: 'owner-2', name: 'Rajesh Kumar' }
+    genderPreference: 'Male', availability: true, owner: { _id: 'owner-2', name: 'Rajesh Kumar' }, isBrokerageFree: true
   },
   {
-    _id: 'dummy-3', title: 'Studio in Koregaon Park', locality: 'Koregaon Park', city: 'Pune', rent: 15000,
+    _id: 'dummy-3', title: 'Studio in Koregaon Park', description: 'Studio apartment with attached bathroom, private kitchen, and high-speed fiber internet.', locality: 'Koregaon Park', city: 'Pune', rent: 15000,
     roomType: 'Studio', images: ['https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=600&h=400&fit=crop'],
     matchScore: 88, preferences: ['Student', 'Non-smoker'],
-    genderPreference: 'Any', availability: false, owner: { _id: 'owner-3', name: 'Neha Patel' }
+    genderPreference: 'Any', availability: false, owner: { _id: 'owner-3', name: 'Neha Patel' }, isBrokerageFree: true
   },
   {
-    _id: 'dummy-4', title: '3BHK in Whitefield', locality: 'Whitefield', city: 'Bangalore', rent: 45000,
+    _id: 'dummy-4', title: '3BHK in Whitefield', description: 'Luxury 3BHK flatmate listing. Looking for neat and clean flatmates to share spacious hall.', locality: 'Whitefield', city: 'Bangalore', rent: 45000,
     roomType: '3BHK', images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop'],
     matchScore: 90, preferences: ['Professional', 'Vegetarian'],
-    genderPreference: 'Any', availability: true, owner: { _id: 'owner-4', name: 'Amit Shah' }
-  },
-  {
-    _id: 'dummy-5', title: 'PG in Dadar', locality: 'Dadar', city: 'Mumbai', rent: 12000,
-    roomType: 'PG', images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop'],
-    matchScore: 78, preferences: ['Student friendly', 'WiFi included'],
-    genderPreference: 'Any', availability: true, owner: { _id: 'owner-5', name: 'Sneha Rao' }
-  },
-  {
-    _id: 'dummy-6', title: '1BHK in Indiranagar', locality: 'Indiranagar', city: 'Bangalore', rent: 20000,
-    roomType: '1BHK', images: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop'],
-    matchScore: 86, preferences: ['Young professional', 'Non-smoker'],
-    genderPreference: 'Male', availability: true, owner: { _id: 'owner-6', name: 'Vikram Joshi' }
+    genderPreference: 'Any', availability: true, owner: { _id: 'owner-4', name: 'Amit Shah' }, isBrokerageFree: true
   },
 ];
 
@@ -77,9 +65,10 @@ export default function BrowseListingsPage() {
   }, []);
 
   const filteredListings = listings.filter((listing) => {
-    if (filters.city !== 'All Cities' && listing.city !== filters.city) return false;
+    if (filters.city !== 'All Cities' && listing.city?.toLowerCase() !== filters.city?.toLowerCase()) return false;
     if (listing.rent < filters.budgetMin || listing.rent > filters.budgetMax) return false;
     if (filters.roomType !== 'All' && listing.roomType !== filters.roomType) return false;
+    if (filters.gender && listing.genderPreference !== filters.gender) return false;
     return true;
   });
 
@@ -94,6 +83,7 @@ export default function BrowseListingsPage() {
   const activeFilters = [
     filters.city !== 'All Cities' && { key: 'city', label: filters.city },
     filters.roomType !== 'All' && { key: 'roomType', label: filters.roomType },
+    filters.gender && { key: 'gender', label: `Gender: ${filters.gender}` },
     filters.budgetMax < 100000 && { key: 'budget', label: `\u20B9${filters.budgetMin.toLocaleString()} - \u20B9${filters.budgetMax.toLocaleString()}` },
   ].filter(Boolean);
 
@@ -119,7 +109,7 @@ export default function BrowseListingsPage() {
                     Filters
                   </h2>
                   {activeFilters.length > 0 && (
-                    <button onClick={resetFilters} className="text-xs text-[#14B8A6] hover:text-[#0F766E] font-medium flex items-center gap-1">
+                    <button onClick={resetFilters} className="text-xs text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1">
                       <RotateCcw size={12} />
                       Reset
                     </button>
@@ -158,12 +148,30 @@ export default function BrowseListingsPage() {
                           value={type}
                           checked={filters.roomType === type}
                           onChange={(e) => updateFilter('roomType', e.target.value)}
-                          className="w-4 h-4 rounded accent-[#14B8A6]"
+                          className="w-4 h-4 rounded accent-teal-500"
                         />
                         <span className="text-sm text-[#64748B]">{type}</span>
                       </label>
                     ))}
                   </div>
+                </div>
+
+                {/* Gender Preference Filter */}
+                <div className="mb-6 pb-6 border-b border-[#E2E8F0]">
+                  <label className="block text-sm font-semibold text-[#0F172A] mb-3 flex items-center gap-2">
+                    <Users size={14} />
+                    Gender Preference
+                  </label>
+                  <select
+                    value={filters.gender}
+                    onChange={(e) => updateFilter('gender', e.target.value)}
+                    className="input text-sm"
+                  >
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Any">Any</option>
+                  </select>
                 </div>
 
                 {/* Budget Range */}
@@ -180,7 +188,7 @@ export default function BrowseListingsPage() {
                       step="1000"
                       value={filters.budgetMin}
                       onChange={(e) => updateFilter('budgetMin', parseInt(e.target.value))}
-                      className="w-full accent-[#14B8A6]"
+                      className="w-full accent-teal-500"
                     />
                     <input
                       type="range"
@@ -189,7 +197,7 @@ export default function BrowseListingsPage() {
                       step="1000"
                       value={filters.budgetMax}
                       onChange={(e) => updateFilter('budgetMax', parseInt(e.target.value))}
-                      className="w-full accent-[#14B8A6]"
+                      className="w-full accent-teal-500"
                     />
                   </div>
                 </div>
@@ -212,6 +220,7 @@ export default function BrowseListingsPage() {
                       onClick={() => {
                         if (filter.key === 'city') updateFilter('city', 'All Cities');
                         else if (filter.key === 'roomType') updateFilter('roomType', 'All');
+                        else if (filter.key === 'gender') updateFilter('gender', '');
                         else if (filter.key === 'budget') resetFilters();
                       }}
                       className="hover:text-teal-900"
@@ -235,6 +244,8 @@ export default function BrowseListingsPage() {
                     key={listing._id}
                     id={listing._id}
                     title={listing.title}
+                    description={listing.description}
+                    isBrokerageFree={listing.isBrokerageFree}
                     locality={listing.locality}
                     city={listing.city}
                     price={listing.rent}

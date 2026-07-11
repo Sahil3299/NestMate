@@ -6,21 +6,21 @@ export default function UserProfileCard({
   avatar, profileImage,
   preferences = [], rating = 4.8, reviews = 12,
   userId,
+  matchScore = 90,
 }) {
   const navigate = useNavigate();
   const displayAvatar = avatar || profileImage || name?.charAt(0)?.toUpperCase();
   const displayProfession = profession || occupation;
-  const compatibilityScore = 92;
 
   return (
     <div className="card overflow-hidden">
-      <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-6 pb-20 relative">
+      <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-6 pb-24 relative">
         <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-[#14B8A6] to-[#0F766E] flex items-center justify-center text-white font-display text-3xl font-bold shadow-lg mb-4">
           {displayAvatar}
         </div>
       </div>
 
-      <div className="px-6 py-6 -mt-10">
+      <div className="px-6 py-8 -mt-6">
         <h3 className="font-display text-xl font-bold text-[#0F172A] mb-1">{name}</h3>
         <p className="text-sm text-[#64748B] mb-4">{age && `${age} \u2022 `}{displayProfession}{displayProfession && city ? ' \u2022 ' : ''}{city}</p>
 
@@ -44,10 +44,10 @@ export default function UserProfileCard({
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" fill="none" stroke="#E2E8F0" strokeWidth="8" />
                 <circle cx="50" cy="50" r="45" fill="none" stroke="#14B8A6" strokeWidth="8"
-                  strokeDasharray={`${compatibilityScore * 2.827} 282.7`} strokeLinecap="round" transform="rotate(-90 50 50)" />
+                  strokeDasharray={`${matchScore * 2.827} 282.7`} strokeLinecap="round" transform="rotate(-90 50 50)" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-[#14B8A6]">{compatibilityScore}%</span>
+                <span className="text-2xl font-bold text-[#14B8A6]">{matchScore}%</span>
                 <span className="text-xs text-[#64748B]">match</span>
               </div>
             </div>

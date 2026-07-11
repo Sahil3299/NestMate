@@ -5,7 +5,7 @@ import { getInitials, getMatchColor } from "@/utils/formatters";
 
 // ── Avatar ─────────────────────────────────────────────────────────────────
 export const Avatar = ({ src, name, size = "md", className }) => {
-  const sizes = { sm: "h-8 w-8 text-xs", md: "h-10 w-10 text-sm", lg: "h-16 w-16 text-xl", xl: "h-24 w-24 text-2xl" };
+  const sizes = { xs: "h-6 w-6 text-[10px]", sm: "h-8 w-8 text-xs", md: "h-10 w-10 text-sm", lg: "h-16 w-16 text-xl", xl: "h-24 w-24 text-2xl" };
   return (
     <AvatarPrimitive.Root className={cn("relative flex shrink-0 overflow-hidden rounded-full", sizes[size], className)}>
       <AvatarPrimitive.Image src={src} alt={name} className="h-full w-full object-cover" />
