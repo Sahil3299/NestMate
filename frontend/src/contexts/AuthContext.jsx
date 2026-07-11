@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { api } from "../lib/api";
+import { initSocket, disconnectSocket } from "../lib/socket";
+
+let socketInitialized = false;
 
 const AuthContext = createContext({
   user: null,
@@ -14,22 +17,29 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     refreshUser();
+    return () => { disconnectSocket(); socketInitialized = false; };
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem("nestmate_token");
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("nestmate_token");
       if (!token) {
         setUser(null);
         setLoading(false);
         return;
       }
 
-      const res = await api.get("/api/auth/me");
-      setUser(res.data.user || null);
+      const res = await api.get("/api/v1/users/me");
+      setUser(res.data.data || null);
       setLoading(false);
+
+      if (!socketInitialized && res.data.data) {
+        initSocket();
+        socketInitialized = true;
+      }
     } catch (err) {
       // Token invalid/expired
+      localStorage.removeItem("accessToken");
       localStorage.removeItem("nestmate_token");
       setUser(null);
       setLoading(false);
@@ -37,7 +47,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("nestmate_token");
+    socketInitialized = false;
+    disconnectSocket();
     setUser(null);
   }, []);
 
@@ -48,4 +61,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-

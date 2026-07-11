@@ -1,132 +1,142 @@
-import React, { useMemo } from "react";
-import { MapPin, ArrowRight } from "lucide-react";
-import TagPill from "./TagPill";
-import Button from "./Button";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Heart, MapPin, Zap, Users, Home } from 'lucide-react';
 
-function getAvatarTone(name = "N") {
-  const tones = [
-    "from-blue-400 to-cyan-500",
-    "from-indigo-400 to-blue-500",
-    "from-sky-400 to-blue-500",
-    "from-blue-500 to-emerald-400",
-  ];
-  return tones[name.charCodeAt(0) % tones.length];
-}
-
-function getCardImageSeed(seed) {
-  return encodeURIComponent(String(seed || "nestmate"));
-}
-
-function getCarouselImages(seed) {
-  const s = getCardImageSeed(seed);
-  return [
-    `https://picsum.photos/seed/${s}-0/1200/800`,
-    `https://picsum.photos/seed/${s}-1/1200/800`,
-    `https://picsum.photos/seed/${s}-2/1200/800`,
-  ];
-}
-
-export default function ListingCard({ match, onOpen }) {
-  const images = useMemo(() => getCarouselImages(match?.uid || match?.name), [match]);
-
-  const tags = useMemo(() => {
-    const t = [];
-    const habits = match?.habits || {};
-
-    // Sleep -> preference tags
-    if (habits.sleep === "late") t.push("Night Owl");
-    if (habits.sleep === "early") t.push("Early Bird");
-    if (habits.sleep === "medium") t.push("Regular Schedule");
-
-    // Lifestyle tags
-    t.push(habits.smoking ? "Smoker" : "Non-smoker");
-    t.push(habits.drinking ? "Drinker" : "Non-drinker");
-    t.push(habits.pets ? "Pet Friendly" : "No Pets");
-
-    // Keep layout tidy
-    return t.slice(0, 4);
-  }, [match]);
-
-  if (!match) return null;
+export default function ListingCard({
+  id,
+  title,
+  description,
+  locality,
+  city,
+  price,
+  roomType,
+  image,
+  matchScore,
+  preferences = [],
+  owner,
+  gender,
+  available = true,
+  isBrokerageFree = true
+}) {
+  const [isSaved, setIsSaved] = useState(false);
 
   return (
-    <div
-      className="group bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-      onClick={onOpen}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open profile for ${match.name || "roommate"}`}
-    >
-      <div className="relative">
+    <div className="card-hover overflow-hidden group bg-white border border-slate-200/80 rounded-2xl hover:shadow-lg transition-all duration-300">
+      {/* Image Container */}
+      <div className="relative overflow-hidden bg-slate-50 h-52 md:h-60">
         <img
-          src={images[0]}
-          alt={`${match.name || "Roommate"} photo`}
-          className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          loading="lazy"
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
 
-        <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-          {match.matchPercent || 0}% Match
+        {/* Room Type & Brokerage Badges */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+          <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-[#0F172A] shadow-sm flex items-center gap-1.5">
+            <Home size={12} />
+            {roomType}
+          </div>
+          {isBrokerageFree && (
+            <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+              100% Brokerage-Free
+            </div>
+          )}
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={(e) => { e.preventDefault(); setIsSaved(!isSaved); }}
+          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all duration-200 hover:shadow-md"
+        >
+          <Heart
+            size={18}
+            className={isSaved ? 'fill-red-500 text-red-500' : 'text-[#64748B]'}
+          />
+        </button>
+
+        {/* Match Score Pill */}
+        {matchScore && (
+          <div className="absolute bottom-3 left-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-md">
+            <Zap size={14} />
+            {matchScore}% Match
+          </div>
+        )}
+
+        {/* Availability Badge */}
+        <div className={`absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1.5 ${
+          available ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${available ? 'bg-green-500' : 'bg-slate-400'}`} />
+          {available ? 'Available' : 'Rented'}
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getAvatarTone(match.name)} flex items-center justify-center text-white font-bold`}
-              >
-                {(match.name?.charAt(0) || "N").toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-lg font-bold text-gray-900 truncate">{match.name}</h3>
-                <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span className="truncate">{match.city}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="whitespace-nowrap">
-                    {match.age} • {match.gender}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Content */}
+      <div className="p-5 md:p-6">
+        {/* Title & Locality */}
+        <h3 className="font-display font-bold text-[#0F172A] mb-1 line-clamp-1 text-lg">
+          {title}
+        </h3>
+        <div className="flex items-center gap-1.5 text-sm text-[#64748B] mb-2">
+          <MapPin size={14} />
+          {locality}, {city}
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-sm text-gray-500 font-medium">Rent</div>
-            <div className="text-lg font-bold text-blue-700 truncate">
-              ₹{match.budgetMin?.toLocaleString?.() ?? match.budgetMin} - ₹
-              {match.budgetMax?.toLocaleString?.() ?? match.budgetMax}
-            </div>
-          </div>
+        {/* Short Description */}
+        {description && (
+          <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed h-8">
+            {description}
+          </p>
+        )}
+
+        {/* Price */}
+        <div className="mb-4">
+          <p className="text-2xl font-bold text-teal-600">
+            &#x20B9;{price.toLocaleString()}<span className="text-sm text-[#64748B] font-normal">/mo</span>
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <TagPill key={tag} label={tag} />
+        {/* Gender & Preferences */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {gender && (
+            <span className="text-xs bg-slate-100 text-[#64748B] px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+              <Users size={11} />
+              {gender}
+            </span>
+          )}
+          {preferences.slice(0, 2).map((pref, idx) => (
+            <span
+              key={idx}
+              className="text-xs bg-slate-100 text-[#64748B] px-2.5 py-1 rounded-full font-medium"
+            >
+              {pref}
+            </span>
           ))}
+          {preferences.length > 2 && (
+            <span className="text-xs bg-slate-100 text-[#64748B] px-2.5 py-1 rounded-full font-medium">
+              +{preferences.length - 2}
+            </span>
+          )}
         </div>
 
-        <div className="pt-1 flex items-center justify-between gap-3">
-          <div className="text-sm text-gray-500">View details</div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="px-3 py-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpen?.();
-            }}
+        {/* Owner & CTA */}
+        <div className="flex items-center justify-between">
+          {owner && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                {owner.avatar || owner.name?.charAt(0) || 'U'}
+              </div>
+              <span className="text-xs text-[#64748B] font-medium">{owner.name}</span>
+            </div>
+          )}
+          <Link
+            to={`/browse/${id}`}
+            className="btn-primary text-xs !px-4 !py-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
           >
-            <span className="text-sm font-semibold">Open</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+            View Details
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-
